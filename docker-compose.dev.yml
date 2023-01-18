@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  studio:
+    image: studio_app
+    container_name: studio_app
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      PYTHONPATH: .
+      TZ: Asia/Tokyo
+    env_file:
+      - .env
+    volumes:
+      - ./studio:/app/studio
+      - ./conda/yaml:/app/conda/yaml
+      - ./studio/test_data:/tmp/studio
+      - studio_dir:/tmp/studio
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+volumes:
+  studio_dir:

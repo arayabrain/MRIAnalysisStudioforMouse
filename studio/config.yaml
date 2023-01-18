@@ -1,0 +1,62 @@
+last_output:
+- b5abe1ae/dummy_image2roi_c2zef8f58l/dummy_image2roi.pkl
+rules:
+  dummy_image2image_wyuxvx530g:
+    hdf5Path: null
+    input:
+    - b5abe1ae/input_0/mouse2p_2_donotouse.pkl
+    nwbfile: null
+    output: b5abe1ae/dummy_image2image_wyuxvx530g/dummy_image2image.pkl
+    params:
+      sample: test
+    path: dummy/dummy_image2image
+    return_arg:
+      input_0: image
+    type: dummy_image2image
+  dummy_image2roi_c2zef8f58l:
+    hdf5Path: null
+    input:
+    - b5abe1ae/dummy_image2image_wyuxvx530g/dummy_image2image.pkl
+    nwbfile: null
+    output: b5abe1ae/dummy_image2roi_c2zef8f58l/dummy_image2roi.pkl
+    params: {}
+    path: dummy/dummy_image2roi
+    return_arg:
+      image2image: image1
+    type: dummy_image2roi
+  input_0:
+    hdf5Path: null
+    input:
+    - mouse2p_2_donotouse.tiff
+    nwbfile:
+      device:
+        description: Microscope Information
+        manufacturer: Microscope Manufacture
+        name: Microscope device
+      experiment_description: None
+      identifier: optinist
+      image_series:
+        name: TwoPhotonSeries
+        starting_frame: 0
+        starting_time: 0
+      imaging_plane:
+        description: standard
+        excitation_lambda: 600.0
+        imaging_rate: 30.0
+        indicator: GCaMap
+        location: V1
+        name: ImagingPlane
+      ophys:
+        plane_segmentation:
+          description: ''
+          name: PlaneSegmentation
+      optical_channel:
+        description: optical channel
+        emission_lambda: 500.0
+        name: OpticalChannel
+      session_description: optinist
+    output: b5abe1ae/input_0/mouse2p_2_donotouse.pkl
+    params: {}
+    path: null
+    return_arg: input_0
+    type: image
