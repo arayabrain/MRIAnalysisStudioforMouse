@@ -24,3 +24,6 @@ docs/_build
 optinist/notebooks
 conda/envs/*
 tensorflow-2.4.1-py3-none-any.whl
+.env
+credential.json
+firebase_config.json
