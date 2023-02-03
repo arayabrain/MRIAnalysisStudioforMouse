@@ -15,6 +15,7 @@ class User(SQLModel):
     email: EmailStr
     display_name: Optional[str]
     created_time: Optional[datetime] = None
+    role: Optional[str]
     last_login_time: Optional[datetime] = None
 
 

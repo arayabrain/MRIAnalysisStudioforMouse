@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from backend.core.security import get_current_user
 from backend.models import Token, User, UserAuth
 from backend.models.user import UserDB, UserSendResetPasswordEmail, UserVerifyResetPasswordCode
-from backend.service import firebase_auth
+from backend.service import firebase_auth, user_service
 from backend.shared.database import get_db
 
 
@@ -13,22 +13,10 @@ router = APIRouter()
 
 @router.post("/register")
 async def register(user_data: UserAuth, db: Session = Depends(get_db)):
-    userDB = None
-    try:
-        user = await firebase_auth.register(user_data.email, user_data.password)
-        userDB = UserDB.from_orm(user)
-        db.add(userDB)
-        await db.commit()
-        await db.refresh(userDB)
-    except Exception as e:
-        if user:
-            await firebase_auth.delete_user(user.uid)
-        await db.rollback()
-        return JSONResponse(
-            content={"message": str(e)},
-            status_code=400
-        )
-    return userDB
+    access_token, err = await firebase_auth.register(user_data.email, user_data.password)
+    if err:
+        raise err
+    return access_token
 
 
 @router.get("/me", response_model=User)

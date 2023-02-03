@@ -6,6 +6,7 @@ import os
 import uvicorn
 from starlette.middleware.cors import CORSMiddleware
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
+from backend.routers import auth
 from studio.routers import (
     files,
     run,
@@ -17,6 +18,7 @@ from studio.routers import (
 )
 
 app = FastAPI(docs_url="/docs", openapi_url="/openapi")
+app.include_router(auth.router, prefix='/auth')
 app.include_router(algolist.router)
 app.include_router(files.router)
 app.include_router(outputs.router)

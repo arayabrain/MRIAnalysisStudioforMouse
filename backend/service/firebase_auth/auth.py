@@ -1,24 +1,29 @@
 import json
 from http import HTTPStatus
 
-from firebase_admin import auth
-from firebase_admin._auth_utils import EmailAlreadyExistsError
+from firebase_admin import auth, exceptions
+
 from requests.exceptions import HTTPError
 
 from backend.models import Token, User, UserAuth
-from backend.models.error import code, make_response
+from backend.models.error import code, make_response, AppException
 
 
 async def register(email: str, password: str):
     # try:\
-    user = auth.create_user(email=email, password=password)
-    user = User(uid= user.uid, email=user.email, display_name=user.display_name)
+    try:
+        user = auth.create_user(email=email, password=password)
+        auth.set_custom_user_claims(user.uid, {'role': 'ADMIN'})
+    except exceptions.FirebaseError as exc:
+        if exc.code == 'ALREADY_EXISTS':
+            return None, AppException(HTTPStatus.BAD_REQUEST, code.E_USER_C_USER_EXIST, detail=str(exc))
+        return None, AppException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, code=code.E_AUTH, detail=str(exc))
+    return user, None
     # except EmailAlreadyExistsError as e:
     #     return None, make_response(HTTPStatus.BAD_REQUEST, code.E_FAIL, detail=e.default_message)
     # except Exception as e:
     #     return None, make_response(HTTPStatus.INTERNAL_SERVER_ERROR, code.E_FAIL)
     # return user, None
-    return user
 
 async def delete_user(user: UserAuth):
     auth.delete_user(user.uid)

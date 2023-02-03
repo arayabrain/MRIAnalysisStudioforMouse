@@ -13,14 +13,14 @@ from backend.service.util import get_one
 
 
 # ======= Fetching Section Begin =======
-async def get_by_username(
+async def get_by_email(
     db: Session,
-    username: str,
+    email: str,
 ) -> Tuple[UserDB, AppException]:
     """
     TODO: missing function docstring
     """
-    user = await get_one(db, UserDB, username=username)
+    user = await get_one(db, UserDB, email=email)
     err = (
         AppException(HTTPStatus.NOT_FOUND, code.E_USER_R_NOTFOUND)
         if user is None

@@ -15,13 +15,13 @@ __all__ = [
 ]
 
 try:
-    credential = credentials.Certificate('./credential.json')
+    credential = credentials.Certificate('mristudio-a799c-firebase-adminsdk-pqsv4-943fa81862.json')
     initialize_app(credential)
 except:
     raise Exception("Error when initializing firebase-admin credential")
 
-try:
-    pb = pyrebase.initialize_app(json.load(open('./firebase_config.json')))
-except:
-    raise Exception("Error when initializing pyrebase credential")
+# try:
+#     pb = pyrebase.initialize_app(json.load(open('./firebase_config.json')))
+# except:
+#     raise Exception("Error when initializing pyrebase credential")
 
