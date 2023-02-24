@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
@@ -9,7 +9,9 @@ import { store } from 'store/store'
 import { ThemeProvider } from '@mui/material/styles'
 import { theme } from './Theme'
 
-ReactDOM.render(
+const domContainer: any = document.getElementById('root')
+const root = createRoot(domContainer)
+root.render(
   <React.StrictMode>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
@@ -17,8 +19,18 @@ ReactDOM.render(
       </ThemeProvider>
     </Provider>
   </React.StrictMode>,
-  document.getElementById('root'),
 )
+
+// ReactDOM.render(
+//   <React.StrictMode>
+//     <Provider store={store}>
+//       <ThemeProvider theme={theme}>
+//         <App />
+//       </ThemeProvider>
+//     </Provider>
+//   </React.StrictMode>,
+//   document.getElementById('root'),
+// )
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

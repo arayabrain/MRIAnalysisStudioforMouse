@@ -14,7 +14,7 @@ import { useRunPipeline } from 'store/slice/Pipeline/PipelineHook'
 import FlowChart from './FlowChart/FlowChart'
 import Visualize from './Visualize/Visualize'
 import Experiment from './Experiment/Experiment'
-import studioLogo from './studio.png'
+import studioLogo from './optinist.png'
 
 const Layout: React.FC = () => {
   const [value, setValue] = React.useState(0)

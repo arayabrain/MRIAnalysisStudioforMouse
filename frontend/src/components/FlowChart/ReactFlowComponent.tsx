@@ -1,7 +1,6 @@
 import React, { DragEvent, MouseEvent } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import ReactFlow, {
-  ReactFlowProvider,
   addEdge,
   Controls,
   Elements,
@@ -10,6 +9,7 @@ import ReactFlow, {
   Node,
   OnLoadParams,
   FlowTransform,
+  ReactFlowProvider,
 } from 'react-flow-renderer'
 import { useDrop } from 'react-dnd'
 
@@ -36,6 +36,8 @@ import {
   TreeItemDragObject,
   TreeItemDropResult,
 } from './DnDItemType'
+
+const ComponentFlowProvider: any = ReactFlowProvider
 
 export const ReactFlowComponent = React.memo<UseRunPipelineReturnType>(
   (props) => {
@@ -117,7 +119,7 @@ export const ReactFlowComponent = React.memo<UseRunPipelineReturnType>(
     )
     return (
       <div className="flow">
-        <ReactFlowProvider>
+        <ComponentFlowProvider>
           <div className="reactflow-wrapper" ref={wrapparRef}>
             <ReactFlow
               ref={drop}
@@ -127,8 +129,8 @@ export const ReactFlowComponent = React.memo<UseRunPipelineReturnType>(
               onLoad={onLoad}
               onDragOver={onDragOver}
               onNodeDragStop={onNodeDragStop}
-              nodeTypes={reactFlowNodeTypes}
-              edgeTypes={reactFlowEdgeTypes}
+              nodeTypes={reactFlowNodeTypes as any}
+              edgeTypes={reactFlowEdgeTypes as any}
               defaultPosition={[flowPosition.x, flowPosition.y]}
               defaultZoom={flowPosition.zoom}
               onMoveEnd={onMoveEnd}
@@ -137,7 +139,7 @@ export const ReactFlowComponent = React.memo<UseRunPipelineReturnType>(
               <Controls />
             </ReactFlow>
           </div>
-        </ReactFlowProvider>
+        </ComponentFlowProvider>
       </div>
     )
   },

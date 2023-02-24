@@ -28,6 +28,7 @@ declare module 'react-linear-gradient-picker' {
       open: boolean
       setOpen: (open: boolean) => void
       trigger?: Function
+      children?: any
     }
   export declare const GradientPicker: React.FC<GRADIENT_PICKER_PROP>
   export declare const GradientPickerPopover: React.FC<GRADIENT_PICKER_POPOVER_PROP>
