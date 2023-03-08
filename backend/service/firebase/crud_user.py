@@ -2,21 +2,33 @@ from fastapi import HTTPException
 from firebase_admin import auth
 
 from backend.models import User
-from backend.models.user import UserCreate, UserUpdate
+from backend.models.user import UserCreate, UserUpdate, ListUserPaging
 
 
-async def list_user(page_token: str = None, limit: int = 100):
+async def list_user(next_page_token: str = None, limit: int = 10):
     try:
-        users = auth.list_users().iterate_all()
-        return [
+        result = auth.list_users(max_results=limit, page_token=next_page_token)
+        users = result.users
+        data = [
             User(
                 uid=user.uid,
                 email=user.email,
                 display_name=user.display_name,
-                role = user.custom_claims.get('role') if user.custom_claims else None
-            ) 
+                role=user.custom_claims.get('role') if user.custom_claims else None
+            )
             for user in users
         ]
+        if not result.has_next_page:
+            next_page_token = None
+        else:
+            next_page_token = result.next_page_token
+
+        total = auth.list_users()
+        if len(total.users) <= limit:
+            total_page = 1
+        else:
+            total_page = len(total.users) // limit + len(total.users) % limit
+        return ListUserPaging(data=data, next_page_token=next_page_token, total_page=total_page)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -54,6 +66,7 @@ async def update_user(user_id: str, data: UserUpdate):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 async def delete_user(user_id: str):
     try:
         user = auth.get_user(user_id)
@@ -63,4 +76,3 @@ async def delete_user(user_id: str):
         return User(uid=user.uid, email=user.email, display_name=user.display_name, role=role)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-

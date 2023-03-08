@@ -7,9 +7,10 @@ from backend.service import firebase
 
 router = APIRouter()
 
+
 @router.get("/", dependencies=[Depends(get_current_admin_user)])
-async def get_list():
-    return await firebase.list_user()
+async def get_list(next_page_token: str = None, limit: int = 10, current_page: int=1):
+    return await firebase.list_user(next_page_token, limit, current_page)
 
 
 @router.post("/", dependencies=[Depends(get_current_admin_user)])
@@ -30,4 +31,3 @@ async def update_user(user_id: str, data: UserUpdate):
 @router.delete("/{user_id}", dependencies=[Depends(get_current_admin_user)])
 async def delete_user(user_id: str):
     return await firebase.delete_user(user_id)
-
