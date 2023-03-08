@@ -9,8 +9,8 @@ router = APIRouter()
 
 
 @router.get("/", dependencies=[Depends(get_current_admin_user)])
-async def get_list(next_page_token: str = None, limit: int = 10, current_page: int=1):
-    return await firebase.list_user(next_page_token, limit, current_page)
+async def get_list(next_page_token: str = None, limit: int = 10):
+    return await firebase.list_user(next_page_token, limit)
 
 
 @router.post("/", dependencies=[Depends(get_current_admin_user)])
