@@ -6,11 +6,10 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InputError from '../../components/common/InputError'
 import SelectError from '../../components/common/SelectError'
-// import { listUser } from 'api/auth'
+import { editUser, listUser } from 'api/auth'
 
 const ModalComponent = ({
-  data,
-  setData,
+  onSubmitEdit,
   setIsOpenModal,
   type,
   dataEdit,
@@ -23,7 +22,7 @@ const ModalComponent = ({
     password: '',
     role: '',
     lab: '',
-    name: '',
+    display_name: '',
     confirmPassword: '',
   })
   const [values, setValues] = useState<{ [key: string]: string }>(
@@ -32,7 +31,7 @@ const ModalComponent = ({
       password: '',
       role: '',
       lab: '',
-      name: '',
+      display_name: '',
       confirmPassword: '',
     },
   )
@@ -45,7 +44,7 @@ const ModalComponent = ({
   }
 
   const validatePassword = (value: string): string => {
-    if (!value) return 'This field is required'
+    if (!value) return ''
     if (!regexPassword.test(value)) {
       return 'Your password must be at least 6 characters long and must contain at least one letter, number, and special character'
     }
@@ -66,13 +65,16 @@ const ModalComponent = ({
       setValues((pre) => ({ ...pre, [type]: value }))
       setErrors((pre) => ({
         ...pre,
-        [type]: value === '' ? 'This field is required' : validate?.(value),
+        [type]:
+          value === '' && !['password', 'confirmPassword'].includes(type)
+            ? 'This field is required'
+            : validate?.(value),
       }))
     },
     [],
   )
 
-  const onSubmit = (e: any) => {
+  const onSubmit = async (e: any) => {
     e.preventDefault()
     const errorEmail = validateEmail(values.email)
     const errorPassword = validatePassword(values.password)
@@ -87,8 +89,8 @@ const ModalComponent = ({
         password: errorPassword,
         confirmPassword:
           errorConfirmPassword === '' ? errorNotMatch : errorConfirmPassword,
-        name:
-          values.name === '' || !formData.hasOwnProperty('name')
+        display_name:
+          values.display_name === '' || !formData.hasOwnProperty('display_name')
             ? 'This field is required'
             : '',
         lab:
@@ -103,12 +105,9 @@ const ModalComponent = ({
       return
     }
     if (type === 'Add') {
-      setData([...data, { ...formData, id: String(Math.random() * 100) }])
+      // setData([...data, { ...formData, id: String(Math.random() * 100) }])
     } else {
-      setData((pre: any) => {
-        pre.splice(data.indexOf(dataEdit), 1, formData)
-        return pre
-      })
+      await onSubmitEdit(dataEdit.uid, formData)
     }
     setIsOpenModal(false)
   }
@@ -129,15 +128,15 @@ const ModalComponent = ({
           />
           <LabelModal>Name: </LabelModal>
           <InputError
-            value={formData?.name || ''}
-            onChange={(e: any) => onChangeData(e, 'name')}
-            onBlur={(e: any) => onBlurData(e, 'name')}
+            value={formData?.display_name || ''}
+            onChange={(e: any) => onChangeData(e, 'display_name')}
+            onBlur={(e: any) => onBlurData(e, 'display_name')}
             errorMessage={errors.name}
           />
           <LabelModal>Role: </LabelModal>
           <SelectError
             value={formData?.role || ''}
-            options={['Admin', 'Researcher', 'Manager']}
+            options={['ADMIN', 'Researcher', 'Manager']}
             onChange={(e: any) => onChangeData(e, 'role')}
             onBlur={(e: any) => onBlurData(e, 'role')}
             errorMessage={errors.role}
@@ -180,26 +179,23 @@ const AccountManager = () => {
   const [openDelete, setOpenDelete] = useState(false)
   const [isOpenModal, setIsOpenModal] = useState(false)
   const [type, setType] = useState<string>('')
-  const [dataEdit, setDateEdit] = useState({})
+  const [dataEdit, setDataEdit] = useState({})
   const [idDel, setIdDel] = useState<string | undefined>()
-  const [data, setData] = useState([
-    {
-      id: '1',
-      lab: 'Lab1',
-      name: 'Mail Address',
-      role: 'Admin',
-      email: 'sfdsf@gmail.com',
-      password: 'abcxyz',
-      confirmPassword: 'abcxyz',
-    },
-  ])
+  const [data, setData] = useState<any[]>([])
+  const [paignate, setPaginate] = useState({ total: 0, per_page: 10, page: 1 })
 
   useEffect(() => {
     getList()
+    //eslint-disable-next-line
   }, [])
 
   const getList = async () => {
-    // const data = await listUser()
+    const data = await listUser({
+      limit: paignate.per_page,
+      offset: paignate.per_page * (paignate.page - 1),
+    })
+    setData(data.data)
+    setPaginate((pre) => ({ ...pre, total: data.total_page }))
   }
 
   const onOpenModal = (type: string) => {
@@ -218,7 +214,7 @@ const AccountManager = () => {
 
   const onForgotPassword = (data: any) => {
     //todo call api
-    setDateEdit(data)
+    setDataEdit(data)
     setIsOpenModal(true)
     setType('Edit')
   }
@@ -230,10 +226,18 @@ const AccountManager = () => {
     handleCloseDelete()
   }
 
+  const onSubmitEdit = async (
+    id: number | string,
+    data: { [key: string]: string },
+  ) => {
+    await editUser(id, data)
+    return getList()
+  }
+
   const columns = useMemo(
     () => [
       { title: 'Lab', name: 'lab' },
-      { title: 'Name', name: 'name' },
+      { title: 'Name', name: 'display_name' },
       { title: 'Role', name: 'role' },
       { title: 'Mail', name: 'email' },
       {
@@ -257,7 +261,7 @@ const AccountManager = () => {
 
   return (
     <AccountManagerWrapper>
-       <h1 style={{ paddingLeft: 16 }}>Account Manager</h1>
+      <h1 style={{ paddingLeft: 16 }}>Account Manager</h1>
       <ModalDeleteAccount
         titleSubmit="Delete Account"
         onClose={handleCloseDelete}
@@ -270,14 +274,18 @@ const AccountManager = () => {
         </ButtonAdd>
       </BoxButton>
       <TableComponent
-        paginate={{ total: 100, page: 1, page_size: 10 }}
+        paginate={{
+          total: paignate.total,
+          page: paignate.page,
+          page_size: paignate.per_page,
+        }}
         data={data}
         columns={columns}
       />
       {isOpenModal ? (
         <ModalComponent
           data={data}
-          setData={setData}
+          onSubmitEdit={onSubmitEdit}
           type={type}
           setIsOpenModal={setIsOpenModal}
           dataEdit={dataEdit}

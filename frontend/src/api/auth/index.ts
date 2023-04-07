@@ -10,7 +10,12 @@ export const getMe = async () => {
   return response.data
 }
 
-export const listUser = async () => {
-  const response = await axios.get('/admin/user')
+export const listUser = async (query?: any) => {
+  const response = await axios.get('/admin/user', { params: query })
+  return response.data
+}
+
+export const editUser = async (userId: string | number, data: any) => {
+  const response = await axios.put(`/admin/user/${userId}`, data)
   return response.data
 }
