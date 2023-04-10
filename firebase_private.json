@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "mrianalysisstudioformouse",
+  "private_key_id": "1e895c60c8218a0c1722d96882da3c0ec587dd36",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCorRv1MTXeDtE4\nGv2/QfV20YAdEnEL7+YBpD61LJVIbVbGINoDcL7EqUSRmFEiqYL5g/A42eIxoSto\nPmLQlByMNveSYFYlAQ/pwbpS+9DRh4tM/fO8Kutyo0c6X7CO/MGsPbwYsVef9Ydn\nmNT859qSAAGA/pWqvt1vWYDJ1xWxaBfF+bQL/2MtB8oNh2ALag3h8prc2GDUEJ6V\n/+OrsMF1qbHXloGX5FPSsYG3IJfoXgXC0V9sjl+uHmYDJc/rQVrEQC4WMjlirIKt\nDXwBdKpCNzRKhQQ3Z0U37J+UfLI+MRce6wUWZjKYkA1GddKQRmodz+eJjccr7gsB\nHH4ucOe9AgMBAAECggEAAZAbEHZMhLp361Bqtf03OErgKETNudnW9IBwWU7osjNb\nKLpQstP2XI2h9kRmSg8uiL/Vd71jGGkhJRXg5gRdUFpJCHjui2i7XEPghVjSekKK\ngqPewIlYRadoJ00QLn7+j2lCByuLf46vmsDihlZiotQvr2GMgvjCRgAbDqO4znw/\n1DUCyjuj1DQVEhm/Z7/dzHyuN4wO47sE4NZGPs5h+j+DlGABdo7b7FOTXlaI9lFK\n7bf1udqX4gnxbuOIePuRTPCCaDTTyPMAg2GXIod1YRvJtA2CAUvRhSEgJ69UHo0a\nZiXcbTP8DGnrcYRywbT44rfNgNyXFdfxTET6e+AQ8QKBgQDSyJxt4QTm5uga6lhW\nzfDIiubJWSvOaqJTgKG4AkrFDwPbaXjHQAmtP/Pm5LhwOJ1+ODHsWwXs76cwtWLr\nhPRQx1dozN93zQYCO3uoI3ULFBlihiD1gHOgo85ykNcI2EOaYhNNq21OwWw/BgNZ\nK3OFJAHCPz2I7Lur3kDodXms7QKBgQDM3CCsnNUmcctBB6W00kecPut7auVn0RIi\nQGjH0gayQSGkT04r7h1EX7sZOYWk2bJNkgwiGYOAEr+FDUZgOtytBzZnmzhpW/wY\nyTaM4x+YMigENlZU/TfN6immMN4hLOvtZwxhtMjvefxX6/euV1emm7cTnsyhIjOu\nnl4PaGycEQKBgQC0U2HYcvBhpdud4yxuHsNGneZxDTN35Sw4Kcywgm17BqxzEll8\nhKGCsTq1JqlPgG/kYqj7HqgEGsa62gLloJnvXYq/Ir5vXFwunrrcjnD8aFaLPlqG\nDT1eiaT9yEHe1D2JnywKf4UFIl670CYfLBgpKDPE/ZtkP7sSfxKijJXqxQKBgDvw\nQCMg9AB+lPCe8y3XxJoDktSWby6T7lFVNRMZ8VmgUt6HUaDq12dU9yInQWH9S/0E\nOUaU3nPPiHe+bZPkRQLfNFzV/ohdIIKEBNDt9yWJr0mkOFg/il9WHv+AFs3wHctl\nNis0QQJIV7vFz78T0RJvRv6XnNmcbzCtJ2osrHJxAoGBAKS5H7wa3OV1TKW3kqje\n6ovY1gcb5FSwgQ3O06WFVkQDlN+zX0Xge43w0THwdpQ+//nxKHwAUatIVgHLSTOz\nLYM9BHn8Hmx1vjq/CMRM6u6Dc09f5hfHTtYiv1+4mogU1yJFs5jcDpyYZ5jtEdwh\nnatafVASqhx0IdnhrosW0NDr\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-lpvky@mrianalysisstudioformouse.iam.gserviceaccount.com",
+  "client_id": "102429924168902546727",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-lpvky%40mrianalysisstudioformouse.iam.gserviceaccount.com"
+}

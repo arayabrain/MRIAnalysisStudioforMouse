@@ -24,10 +24,8 @@ async def list_user(next_page_token: str = None, limit: int = 10):
             next_page_token = result.next_page_token
 
         total = auth.list_users()
-        if len(total.users) <= limit:
-            total_page = 1
-        else:
-            total_page = len(total.users) // limit + len(total.users) % limit
+        import math
+        total_page = math.ceil(len(total.users) / limit)
         return ListUserPaging(data=data, next_page_token=next_page_token, total_page=total_page)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
