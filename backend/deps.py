@@ -2,8 +2,10 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response, Depends
 from firebase_admin import auth
 
+from backend.service.firebase.crud_user import read_user
 
-def get_current_user(
+
+async def get_current_user(
     res: Response,
     credential: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False)),
 ):
@@ -21,7 +23,8 @@ def get_current_user(
             headers={'WWW-Authenticate': 'Bearer error="invalid_token"'},
         )
     res.headers['WWW-Authenticate'] = 'Bearer realm="auth_required"'
-    return user
+    user =  await read_user(user_id=user['uid'])
+    return user.dict()
 
 
 def get_current_admin_user(current_user = Depends(get_current_user)):

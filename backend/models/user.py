@@ -11,11 +11,13 @@ class UserAuth(BaseModel):
 
 class UserCreate(UserAuth):
     display_name: Optional[str]
+    lab: Optional[str]
     role: Literal['USER', 'ADMIN']
 
 
 class UserUpdate(BaseModel):
     display_name: Optional[str]
+    lab: Optional[str]
     role: Literal['USER', 'ADMIN']
 
 
@@ -25,6 +27,7 @@ class User(BaseModel):
     display_name: Optional[str]
     created_time: Optional[datetime] = None
     role: Optional[str]
+    lab: Optional[str]
     last_login_time: Optional[datetime] = None
 
 

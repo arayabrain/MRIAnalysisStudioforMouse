@@ -8,10 +8,11 @@ from backend.models import Token, UserAuth
 from backend.models.error import AppException, code, make_response
 
 
-async def register(email: str, password: str, role: str = None):
+async def register(email: str, password: str, role: str = None, lab: str = None):
     try:
         user = auth.create_user(email=email, password=password)
-        auth.set_custom_user_claims(user.uid, {'role': role})
+        user_claims = {'role': role, 'lab': lab}
+        auth.set_custom_user_claims(user.uid, user_claims)
     except exceptions.FirebaseError as exc:
         if exc.code == 'ALREADY_EXISTS':
             return None, AppException(HTTPStatus.BAD_REQUEST, code.E_USER_C_USER_EXIST, detail=str(exc))
