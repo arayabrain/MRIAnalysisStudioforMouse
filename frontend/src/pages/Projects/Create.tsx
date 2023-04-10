@@ -394,16 +394,20 @@ const ProjectFormComponent = () => {
         name="radio-buttons-group"
         onChange={handleChangeLevel}
       >
-        <FormControlLabel
-          value="factor"
-          control={<Radio />}
-          label="Between factor"
-        />
-        <FormControlLabel
-          value="within-factor"
-          control={<Radio />}
-          label="Between factor-within factor"
-        />
+        <Box>
+          <Box>
+            <FormControlLabel
+              value="factor"
+              control={<Radio />}
+              label="Between factor"
+            />
+          </Box>
+          <FormControlLabel
+            value="within-factor"
+            control={<Radio />}
+            label="Between factor-within factor"
+          />
+        </Box>
       </BoxOptions>
       <DropAndDropBox>
         <DragBox>
@@ -563,6 +567,8 @@ const ProjectsWrapper = styled(Box)(({ theme }) => ({
 const BoxOptions = styled(RadioGroup)(({ theme }) => ({
   width: '100%',
   padding: theme.spacing(1, 2),
+  display: 'flex',
+  flexDirection: 'inherit',
 }))
 
 const InputName = styled('input')(({ theme }) => ({
