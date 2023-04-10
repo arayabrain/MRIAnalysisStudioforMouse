@@ -6,7 +6,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InputError from '../../components/common/InputError'
 import SelectError from '../../components/common/SelectError'
-import { editUser, listUser } from 'api/auth'
+import { createUser, deleteUser, editUser, listUser } from 'api/auth'
+import { useUser } from 'providers'
 
 const ModalComponent = ({
   onSubmitEdit,
@@ -104,11 +105,7 @@ const ModalComponent = ({
       })
       return
     }
-    if (type === 'Add') {
-      // setData([...data, { ...formData, id: String(Math.random() * 100) }])
-    } else {
-      await onSubmitEdit(dataEdit.uid, formData)
-    }
+    await onSubmitEdit(dataEdit.uid, formData)
     setIsOpenModal(false)
   }
   const onCancel = () => {
@@ -183,6 +180,7 @@ const AccountManager = () => {
   const [idDel, setIdDel] = useState<string | undefined>()
   const [data, setData] = useState<any[]>([])
   const [paignate, setPaginate] = useState({ total: 0, per_page: 10, page: 1 })
+  const { user } = useUser()
 
   useEffect(() => {
     getList()
@@ -220,17 +218,24 @@ const AccountManager = () => {
   }
 
   const onDelete = () => {
-    const index = data.findIndex((item) => item.id === idDel)
-    data.splice(index, 1)
-    //todo call api
-    handleCloseDelete()
+    if (idDel === undefined) return
+    deleteUser(idDel).then(() => {
+      handleCloseDelete()
+      setIdDel(undefined)
+      setOpenDelete(false)
+      getList()
+    })
   }
 
   const onSubmitEdit = async (
     id: number | string,
     data: { [key: string]: string },
   ) => {
-    await editUser(id, data)
+    if (id !== undefined) {
+      await editUser(id, data)
+    } else {
+      await createUser(data)
+    }
     return getList()
   }
 
@@ -244,20 +249,33 @@ const AccountManager = () => {
         title: '',
         name: 'action',
         width: 185,
-        render: (data: any) => (
-          <>
-            <ALink sx={{ color: 'red' }} onClick={() => onForgotPassword(data)}>
-              <EditIcon sx={{ color: 'black' }} />
-            </ALink>
-            <ALink sx={{ ml: 1.25 }} onClick={() => onConfirmDelete(data.id)}>
-              <DeleteIcon sx={{ color: 'red' }} />
-            </ALink>
-          </>
-        ),
+        render: (data: any) => {
+          if (data.uid === user?.uid) return null
+          return (
+            <>
+              <ALink
+                sx={{ color: 'red' }}
+                onClick={() => onForgotPassword(data)}
+              >
+                <EditIcon sx={{ color: 'black' }} />
+              </ALink>
+              <ALink
+                sx={{ ml: 1.25 }}
+                onClick={() => onConfirmDelete(data.uid)}
+              >
+                <DeleteIcon sx={{ color: 'red' }} />
+              </ALink>
+            </>
+          )
+        },
       },
     ],
-    [],
+    [user?.uid],
   )
+
+  if (user?.role !== 'ADMIN') {
+    return <Box>You don't have permission</Box>
+  }
 
   return (
     <AccountManagerWrapper>

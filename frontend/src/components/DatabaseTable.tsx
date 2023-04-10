@@ -52,7 +52,7 @@ type RenderColumnProps = {
   previewImage?: boolean
   allowMutilKey?: boolean
   drags: any[]
-  onMouseDown: (event: MouseEvent<HTMLTableRowElement>) => any
+  onMouseDown: (event: MouseEvent<HTMLTableRowElement>, image: any) => any
 }
 
 const renderCol = (col: Column, item: any, index: number, child?: boolean) => {
@@ -132,8 +132,8 @@ const RenderColumn = (props: RenderColumnProps) => {
   } = props
   const { draggable, onDrag, onDragEnd } = props
 
-  const onDragEvent = (_: any, image: any) => {
-    return onDrag?.([image])
+  const onDragEvent = (event: any, image: any) => {
+    return onDrag?.(event, [image])
   }
 
   if (Array.isArray(item.sessions) && item.sessions?.length && !isData) {
@@ -157,13 +157,13 @@ const RenderColumn = (props: RenderColumnProps) => {
       const isDragging = drags.find((drag: any) => drag.id === image.id)
       return (
         <Tr
-          onMouseDown={onMouseDown}
+          onMouseDown={(e) => onMouseDown?.(e, image)}
           id={image.id}
           key={`data_show_image_${image.id}_${index}`}
           onClick={(e) => rowClick?.(e, image)}
-          draggable={draggable}
-          onDragStart={(e) => onDragEvent?.(e, image)}
-          onDragEnd={onDragEnd}
+          // draggable={draggable}
+          // onDragStart={(e) => onDragEvent?.(e, image)}
+          // onDragEnd={onDragEnd}
           style={{
             border: `${
               isDragging && draggable && !beginDrag ? 2 : 0
@@ -230,6 +230,7 @@ const DatabaseTableComponent: FC<TableComponentProps> = (props) => {
   const { data = [], columns = [] } = props
   const [drags, setDrags] = useState<any[]>([])
   const [mouseMoveRect, setMouseMoveRect] = useState({ pageX: 0, pageY: 0 })
+  const timeoutClick = useRef<NodeJS.Timeout | undefined>()
 
   const ctrRef = useRef(false)
   const refTdSelect = useRef<{
@@ -275,6 +276,27 @@ const DatabaseTableComponent: FC<TableComponentProps> = (props) => {
     image: any,
   ) => {
     if (!ctrRef.current || !draggable) {
+      if (!timeoutClick.current) {
+        timeoutClick.current = setTimeout(() => {
+          timeoutClick.current = undefined
+        }, 300)
+        if (!ctrRef.current) {
+          setDrags([image])
+          const tds = event.currentTarget.getElementsByTagName('td')
+          refTdSelect.current[event.currentTarget.id] = {
+            dom: event.currentTarget as unknown as HTMLTableRowElement,
+            tds: [],
+          }
+          for (let i = 0; i < tds.length; i++) {
+            refTdSelect.current[event.currentTarget.id].tds.push({
+              id: tds[i].id,
+              dom: tds[i],
+              html: tds[i].innerHTML,
+            })
+          }
+        }
+        return
+      }
       return rowClick?.(image)
     }
     if (drags.find((drag: any) => drag.id === image.id)) {
@@ -297,8 +319,13 @@ const DatabaseTableComponent: FC<TableComponentProps> = (props) => {
     }
   }
 
-  const onMouseDown = (event: MouseEvent<HTMLTableRowElement>) => {
-    if (!drags.length || !draggable) return
+  const onMouseDown = (event: MouseEvent<HTMLTableRowElement>, image: any) => {
+    if (
+      !drags.length ||
+      !draggable ||
+      !drags.some((drag) => drag.id === image.id)
+    )
+      return
     mouseStart.current = { pageX: event.pageX, pageY: event.pageY }
     onDrag?.(drags)
   }
@@ -315,6 +342,11 @@ const DatabaseTableComponent: FC<TableComponentProps> = (props) => {
       pageX: event.pageX - mouseStart.current.pageX,
       pageY: event.pageY - mouseStart.current.pageY,
     })
+  }
+
+  const onBeginDrag = (e: any, image: any) => {
+    e.preventDefault()
+    onDrag?.(image)
   }
 
   return (
@@ -367,7 +399,7 @@ const DatabaseTableComponent: FC<TableComponentProps> = (props) => {
                 draggableProps={draggable}
                 key={`row_table_${item.id}_${index}`}
                 drags={drags}
-                onDrag={onDrag}
+                onDrag={onBeginDrag}
                 onDragEnd={onDragEnd}
               />
             ))}
@@ -378,7 +410,8 @@ const DatabaseTableComponent: FC<TableComponentProps> = (props) => {
       {beginDrag &&
         drags.map((el) => {
           const trNow = refTdSelect.current[el.id]
-          const { width, height, top, left } = trNow.dom.getBoundingClientRect()
+          const { width, height, top, left } =
+            trNow.dom?.getBoundingClientRect()
           const style = {
             width,
             height,

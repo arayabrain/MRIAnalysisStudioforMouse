@@ -15,7 +15,17 @@ export const listUser = async (query?: any) => {
   return response.data
 }
 
+export const createUser = async (data: any) => {
+  const response = await axios.post(`/admin/user`, data)
+  return response.data
+}
+
 export const editUser = async (userId: string | number, data: any) => {
   const response = await axios.put(`/admin/user/${userId}`, data)
+  return response.data
+}
+
+export const deleteUser = async (userId: string | number) => {
+  const response = await axios.delete(`/admin/user/${userId}`)
   return response.data
 }

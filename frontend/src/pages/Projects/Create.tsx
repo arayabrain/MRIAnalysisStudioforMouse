@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DatabaseTableComponent from 'components/DatabaseTable'
-import React, { useState, DragEvent, Fragment } from 'react'
+import React, { useState, DragEvent, Fragment, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getNanoId } from 'utils/nanoid/NanoIdUtils'
 import { defaultDatabase, PopupSearch, Viewer } from '../Database'
@@ -73,6 +73,7 @@ const ProjectFormComponent = () => {
   const [dataFactors, setDataFactors] = useState<DataFactor[]>([
     { name: nameDefault, within: [], id: getNanoId(), data: [] },
   ])
+  const timeoutClick = useRef<NodeJS.Timeout | undefined>()
   const navigate = useNavigate()
 
   const onChangeName = (e: any) => {
@@ -332,7 +333,12 @@ const ProjectFormComponent = () => {
   }
 
   const rowDataClick = (row: any) => {
-    if (!row?.image_url) return
+    if (!row?.image_url || !timeoutClick.current) {
+      timeoutClick.current = setTimeout(() => {
+        timeoutClick.current = undefined
+      }, 300)
+      return
+    }
     setViewer({
       open: true,
       url: row.image_url,
