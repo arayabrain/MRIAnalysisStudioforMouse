@@ -14,7 +14,8 @@ async def list_user(next_page_token: str = None, limit: int = 10):
                 uid=user.uid,
                 email=user.email,
                 display_name=user.display_name,
-                role=user.custom_claims.get('role') if user.custom_claims else None
+                role=user.custom_claims.get('role') if user.custom_claims else None,
+                lab=user.custom_claims.get('lab') if user.custom_claims else None
             )
             for user in users
         ]
