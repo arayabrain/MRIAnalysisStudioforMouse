@@ -145,24 +145,28 @@ const ModalComponent = ({
             onBlur={(e: any) => onBlurData(e, 'email', validateEmail)}
             errorMessage={errors.email}
           />
-          <LabelModal>Password: </LabelModal>
-          <InputError
-            value={formData?.password || ''}
-            onChange={(e: any) => onChangeData(e, 'password')}
-            onBlur={(e: any) => onBlurData(e, 'password', validatePassword)}
-            type={'password'}
-            errorMessage={errors.password}
-          />
-          <LabelModal>Confirm Password: </LabelModal>
-          <InputError
-            value={formData?.confirmPassword || ''}
-            onChange={(e: any) => onChangeData(e, 'confirmPassword')}
-            onBlur={(e: any) =>
-              onBlurData(e, 'confirmPassword', validatePassword)
-            }
-            type={'password'}
-            errorMessage={errors.confirmPassword}
-          />
+          {type === 'Add' ? (
+            <>
+              <LabelModal>Password: </LabelModal>
+              <InputError
+                value={formData?.password || ''}
+                onChange={(e: any) => onChangeData(e, 'password')}
+                onBlur={(e: any) => onBlurData(e, 'password', validatePassword)}
+                type={'password'}
+                errorMessage={errors.password}
+              />
+              <LabelModal>Confirm Password: </LabelModal>
+              <InputError
+                value={formData?.confirmPassword || ''}
+                onChange={(e: any) => onChangeData(e, 'confirmPassword')}
+                onBlur={(e: any) =>
+                  onBlurData(e, 'confirmPassword', validatePassword)
+                }
+                type={'password'}
+                errorMessage={errors.confirmPassword}
+              />
+            </>
+          ) : null}
         </BoxData>
         <ButtonModal>
           <Button onClick={(e) => onSubmit(e)}>Ok</Button>
@@ -179,7 +183,12 @@ const AccountManager = () => {
   const [dataEdit, setDataEdit] = useState({})
   const [idDel, setIdDel] = useState<string | undefined>()
   const [data, setData] = useState<any[]>([])
-  const [paignate, setPaginate] = useState({ total: 0, per_page: 10, page: 1 })
+  const [paginate, setPaginate] = useState({
+    total: 0,
+    per_page: 10,
+    page: -1,
+    next_page_token: [],
+  })
   const { user } = useUser()
 
   useEffect(() => {
@@ -187,13 +196,27 @@ const AccountManager = () => {
     //eslint-disable-next-line
   }, [])
 
-  const getList = async () => {
-    const data = await listUser({
-      limit: paignate.per_page,
-      offset: paignate.per_page * (paignate.page - 1),
-    })
+  const getList = async (page: number = 0) => {
+    if (page === paginate.page) return
+    const query: { [key: string]: string | number } = {
+      offset: paginate.per_page * page,
+    }
+    console.log('paginate.next_page_token[page - 1]', paginate)
+    if (paginate.next_page_token[page - 1]) {
+      query.next_page_token = paginate.next_page_token[page - 1]
+    }
+    const data = await listUser(query)
+    const nextPageToken: string[] = paginate.next_page_token
+    if (page > paginate.page) {
+      nextPageToken.push(data.next_page_token)
+    }
     setData(data.data)
-    setPaginate((pre) => ({ ...pre, total: data.total_page }))
+    setPaginate((pre) => ({
+      ...pre,
+      total: data.total_page * paginate.per_page,
+      next_page_token: nextPageToken as any,
+      page,
+    }))
   }
 
   const onOpenModal = (type: string) => {
@@ -293,9 +316,12 @@ const AccountManager = () => {
       </BoxButton>
       <TableComponent
         paginate={{
-          total: paignate.total,
-          page: paignate.page,
-          page_size: paignate.per_page,
+          total: paginate.total,
+          page: paginate.page,
+          page_size: paginate.per_page,
+          onPageChange: ({ selected }) => {
+            getList(selected)
+          },
         }}
         data={data}
         columns={columns}
