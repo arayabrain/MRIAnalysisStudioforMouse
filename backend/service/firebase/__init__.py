@@ -19,22 +19,12 @@ __all__ = [
 
 
 try:
-    credential = credentials.Certificate('mristudio-a799c-firebase-adminsdk-pqsv4-943fa81862.json')
+    credential = credentials.Certificate('firebase_private.json')
     initialize_app(credential)
 except:
     raise Exception("Error when initializing firebase-admin credential")
 
 try:
-    # pb = pyrebase.initialize_app(json.load(open('./firebase_config.json')))
-    pb = pyrebase.initialize_app({
-        'apiKey': 'AIzaSyBATPJ-yLeH_hPMPNmFBvXt63LU9VMAuMw',
-        'authDomain': 'mristudio-a799c.firebaseapp.com',
-        'projectId': 'mristudio-a799c',
-        'databaseURL': '',
-        'storageBucket': '',
-        'messagingSenderId': '',
-        'appId': '1:912218554809:web:b80035af8eb725133eb668',
-        'measurementId': 'G-2LJVW8E57N'
-    })
+    pb = pyrebase.initialize_app(json.load(open('firebase_config.json')))
 except:
     raise Exception("Error when initializing pyrebase credential")
