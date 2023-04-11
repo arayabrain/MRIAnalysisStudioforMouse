@@ -60,6 +60,9 @@ studio also supports reproducibility of scientific research, standardization of 
 
 
 ## Installation
+- Copy `firebase_config.example.json` to `firebase_config.json` and replace content of `firebase_config.json` with your Firebase config.
+- Copy `firebase_private.example.json` to `firebase_private.json` and replace content of `firebase_private.json` with your Firebase private key.
+
 **Docker required**
 - On Linux or macOS:
   - Grant execute permission to the run_app.sh file (only run for the first time):
