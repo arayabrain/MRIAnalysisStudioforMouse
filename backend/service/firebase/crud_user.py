@@ -41,7 +41,7 @@ async def create_user(data: UserCreate):
         user = auth.create_user(**user_data)
         user_claims = {'role': role_data, 'lab': lab_data}
         auth.set_custom_user_claims(user.uid, user_claims)
-        return User(uid=user.uid, email=user.email, display_name=user.display_name, role=role_data, lab=lab_data)
+        return await read_user(user.uid)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error creating user: {e}")
 
@@ -62,10 +62,10 @@ async def update_user(user_id: str, data: UserUpdate):
         role_data = user_data.pop('role')
         lab_data = user_data.pop('lab')
 
-        user = auth.update_user(user_id, **user_data)
-
         user_claims = {'role': role_data, 'lab': lab_data}
-        auth.set_custom_user_claims(user.uid, user_claims)
+        auth.set_custom_user_claims(user_id, user_claims)
+
+        user = auth.update_user(user_id, **user_data)
         role = user.custom_claims.get('role') if user.custom_claims else None
         lab = user.custom_claims.get('lab') if user.custom_claims else None
         return User(uid=user.uid, email=user.email, display_name=user.display_name, role=role, lab=lab)
@@ -74,12 +74,7 @@ async def update_user(user_id: str, data: UserUpdate):
 
 
 async def delete_user(user_id: str):
-    try:
-        user = auth.get_user(user_id)
-        role = user.custom_claims.get('role') if user.custom_claims else None
-        lab = user.custom_claims.get('lab') if user.custom_claims else None
+    user = await read_user(user_id)
 
-        auth.delete_user(user.uid)
-        return User(uid=user.uid, email=user.email, display_name=user.display_name, role=role, lab=lab)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    auth.delete_user(user.uid)
+    return user
