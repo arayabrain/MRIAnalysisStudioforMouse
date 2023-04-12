@@ -1,8 +1,13 @@
 from datetime import datetime
 from typing import Optional, Literal, List
-
+from enum import Enum
 from pydantic import BaseModel, EmailStr
 
+
+class UserRole(str, Enum):
+    ADMIN = 'ADMIN'
+    RESEARCHER = 'Researcher'
+    MANAGER = 'Manager'
 
 class UserAuth(BaseModel):
     email: EmailStr
@@ -12,13 +17,13 @@ class UserAuth(BaseModel):
 class UserCreate(UserAuth):
     display_name: Optional[str]
     lab: Optional[str]
-    role: Literal['USER', 'ADMIN']
+    role: Literal[UserRole.ADMIN, UserRole.RESEARCHER, UserRole.MANAGER]
 
 
 class UserUpdate(BaseModel):
     display_name: Optional[str]
     lab: Optional[str]
-    role: Literal['USER', 'ADMIN']
+    role: Literal[UserRole.ADMIN, UserRole.RESEARCHER, UserRole.MANAGER]
 
 
 class User(BaseModel):
@@ -26,7 +31,7 @@ class User(BaseModel):
     email: EmailStr
     display_name: Optional[str]
     created_time: Optional[datetime] = None
-    role: Optional[str]
+    role: Literal[UserRole.ADMIN, UserRole.RESEARCHER, UserRole.MANAGER]
     lab: Optional[str]
     last_login_time: Optional[datetime] = None
 

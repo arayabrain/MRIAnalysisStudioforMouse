@@ -1,3 +1,4 @@
+from backend.models.user import UserRole
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response, Depends
 from firebase_admin import auth
@@ -28,7 +29,7 @@ async def get_current_user(
 
 
 def get_current_admin_user(current_user = Depends(get_current_user)):
-    if current_user.get('role') == 'ADMIN':
+    if current_user.get('role') == UserRole.ADMIN:
         return current_user
     else:
         raise HTTPException(
