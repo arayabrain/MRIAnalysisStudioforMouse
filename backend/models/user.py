@@ -6,8 +6,8 @@ from pydantic import BaseModel, EmailStr
 
 class UserRole(str, Enum):
     ADMIN = 'ADMIN'
-    RESEARCHER = 'Researcher'
-    MANAGER = 'Manager'
+    RESEARCHER = 'RESEARCHER'
+    MANAGER = 'MANAGER'
 
 class UserAuth(BaseModel):
     email: EmailStr
@@ -31,7 +31,7 @@ class User(BaseModel):
     email: EmailStr
     display_name: Optional[str]
     created_time: Optional[datetime] = None
-    role: Literal[UserRole.ADMIN, UserRole.RESEARCHER, UserRole.MANAGER]
+    role: Optional[Literal[UserRole.ADMIN, UserRole.RESEARCHER, UserRole.MANAGER]]
     lab: Optional[str]
     last_login_time: Optional[datetime] = None
 
