@@ -11,8 +11,7 @@ from optinist.api.config.config_reader import ConfigReader
 from optinist.api.utils.filepath_creater import join_filepath
 
 from backend.routers import auth, user_manage
-from studio.routers import (algolist, experiment, files, hdf5, outputs, params,
-                            run)
+from optinist.routers import (algolist, experiment, files, hdf5, outputs, params, run)
 
 app = FastAPI(docs_url="/docs", openapi_url="/openapi")
 app.include_router(auth.router, prefix='/auth', tags=['auth'])
