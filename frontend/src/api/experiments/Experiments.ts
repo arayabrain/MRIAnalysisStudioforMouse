@@ -1,26 +1,36 @@
 import axios from 'axios'
 
 import { BASE_URL } from 'const/API'
-import { RunPostData } from 'api/run/Run'
+import { EdgeDict, NodeDict, OutputPathsDTO, RunPostData } from 'api/run/Run'
+import { EXPERIMENTS_STATUS } from 'store/slice/Experiments/ExperimentsType'
 
 export type ExperimentsDTO = {
   [uid: string]: ExperimentDTO
 }
 
-export type ExperimentDTO = {
-  function: {
-    [uid: string]: {
-      name: string
-      success: string
-      unique_id: string
-      hasNWB: boolean
-    }
+export type FunctionsDTO = {
+  [nodeId: string]: {
+    name: string
+    success: string
+    unique_id: string
+    hasNWB: boolean
+    message?: string
+    started_at?: string
+    finished_at?: string
+    outputPaths?: OutputPathsDTO
   }
+}
+
+export type ExperimentDTO = {
+  function: FunctionsDTO
   name: string
-  success: string
-  timestamp: string
+  success?: EXPERIMENTS_STATUS
+  started_at: string
+  finished_at?: string
   unique_id: string
   hasNWB: boolean
+  edgeDict: EdgeDict
+  nodeDict: NodeDict
 }
 
 export async function getExperimentsApi(): Promise<ExperimentsDTO> {
@@ -46,6 +56,11 @@ export async function importExperimentByUidApi(
   uid: string,
 ): Promise<RunPostData> {
   const response = await axios.get(`${BASE_URL}/experiments/import/${uid}`)
+  return response.data
+}
+
+export async function fetchExperimentApi(): Promise<ExperimentDTO | null> {
+  const response = await axios.get(`${BASE_URL}/experiments/fetch`)
   return response.data
 }
 

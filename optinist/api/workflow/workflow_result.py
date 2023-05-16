@@ -1,5 +1,6 @@
 import os
 from dataclasses import asdict
+from datetime import datetime
 from glob import glob
 from typing import Dict
 
@@ -113,6 +114,18 @@ class NodeResult:
         else:
             expt_config.function[self.node_id].success = "success"
             message = self.success()
+            expt_config.function[self.node_id].outputPaths = message.outputPaths
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        expt_config.function[self.node_id].finished_at = now
+        expt_config.function[self.node_id].message = message.message
+
+        statuses = list(map(lambda x: x.success, expt_config.function.values()))
+        if "running" not in statuses:
+            expt_config.finished_at = now
+            if "error" in statuses:
+                expt_config.success = "error"
+            else:
+                expt_config.success = "success"
 
         ConfigWriter.write(
             dirname=self.workflow_dirpath,

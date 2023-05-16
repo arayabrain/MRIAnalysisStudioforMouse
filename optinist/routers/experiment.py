@@ -1,4 +1,5 @@
-from typing import Dict
+from typing import Dict, Optional
+from datetime import datetime
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
@@ -41,6 +42,25 @@ async def import_experiment(unique_id: str):
         "nodeDict": config.nodeDict,
         "edgeDict": config.edgeDict,
     }
+
+
+@router.get(
+    "/experiments/fetch", response_model=Optional[ExptConfig], tags=["experiments"]
+)
+async def fetch_last_experiment():
+    last_expt_config: Optional[ExptConfig] = None
+    config_paths = glob(
+        join_filepath([DIRPATH.OUTPUT_DIR, "*", DIRPATH.EXPERIMENT_YML])
+    )
+    for path in config_paths:
+        config = ExptConfigReader.read(path)
+        if not last_expt_config:
+            last_expt_config = config
+        elif datetime.strptime(
+            config.started_at, "%Y-%m-%d %H:%M:%S"
+        ) > datetime.strptime(last_expt_config.started_at, "%Y-%m-%d %H:%M:%S"):
+            last_expt_config = config
+    return last_expt_config
 
 
 @router.delete("/experiments/{unique_id}", response_model=bool, tags=['experiments'])

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 
-from optinist.api.workflow.workflow import Edge, Node
+from optinist.api.workflow.workflow import Edge, Node, OutputPath
 
 
 @dataclass
@@ -10,11 +10,17 @@ class ExptFunction:
     name: str
     success: str
     hasNWB: bool
+    message: Optional[str] = None
+    outputPaths: Optional[Dict[str, OutputPath]] = None
+    started_at: Optional[str] = None
+    finished_at: Optional[str] = None
 
 
 @dataclass
 class ExptConfig:
-    timestamp: str
+    started_at: str
+    finished_at: Optional[str]
+    success: Optional[str]
     name: str
     unique_id: str
     hasNWB: bool

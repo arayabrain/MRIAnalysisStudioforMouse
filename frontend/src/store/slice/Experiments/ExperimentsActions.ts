@@ -5,6 +5,8 @@ import {
   deleteExperimentByUidApi,
   importExperimentByUidApi,
   deleteExperimentByListApi,
+  ExperimentDTO,
+  fetchExperimentApi,
 } from 'api/experiments/Experiments'
 import { RunPostData } from 'api/run/Run'
 import { EXPERIMENTS_SLICE_NAME } from './ExperimentsType'
@@ -15,6 +17,21 @@ export const getExperiments = createAsyncThunk<ExperimentsDTO, undefined>(
     try {
       const response = await getExperimentsApi()
       return response
+    } catch (e) {
+      return thunkAPI.rejectWithValue(e)
+    }
+  },
+)
+
+export const fetchExperiment = createAsyncThunk<ExperimentDTO, undefined>(
+  `${EXPERIMENTS_SLICE_NAME}/fetchExperiment`,
+  async (_, thunkAPI) => {
+    try {
+      const response = await fetchExperimentApi()
+      return (
+        response ??
+        thunkAPI.rejectWithValue({ message: 'No experiments found' })
+      )
     } catch (e) {
       return thunkAPI.rejectWithValue(e)
     }

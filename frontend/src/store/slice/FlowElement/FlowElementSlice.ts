@@ -21,7 +21,10 @@ import {
   INITIAL_IMAGE_ELEMENT_NAME,
   REACT_FLOW_NODE_TYPE_KEY,
 } from 'const/flowchart'
-import { importExperimentByUid } from '../Experiments/ExperimentsActions'
+import {
+  fetchExperiment,
+  importExperimentByUid,
+} from '../Experiments/ExperimentsActions'
 import { setInputNodeFilePath } from 'store/slice/InputNode/InputNodeActions'
 import { isInputNodePostData } from 'api/run/RunUtils'
 import { addAlgorithmNode, addInputNode } from './FlowElementActions'
@@ -196,6 +199,34 @@ export const flowElementSlice = createSlice({
         }
       })
       .addCase(importExperimentByUid.fulfilled, (state, action) => {
+        state.flowPosition = initialFlowPosition
+        state.elementCoord = initialElementCoord
+        const newNodeList: Elements<NodeData> = Object.values(
+          action.payload.nodeDict,
+        ).map((node) => {
+          if (isInputNodePostData(node)) {
+            return {
+              ...node,
+              data: {
+                label: node.data?.label ?? '',
+                type: node.data?.type ?? 'input',
+              },
+            }
+          } else {
+            return {
+              ...node,
+              data: {
+                label: node.data?.label ?? '',
+                type: node.data?.type ?? 'algorithm',
+              },
+            }
+          }
+        })
+        state.flowElements = newNodeList.concat(
+          Object.values(action.payload.edgeDict),
+        )
+      })
+      .addCase(fetchExperiment.fulfilled, (state, action) => {
         state.flowPosition = initialFlowPosition
         state.elementCoord = initialElementCoord
         const newNodeList: Elements<NodeData> = Object.values(
