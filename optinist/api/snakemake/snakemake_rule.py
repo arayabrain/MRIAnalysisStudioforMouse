@@ -92,6 +92,7 @@ class SmkRule:
             self._node.data.label
         )
         algo_output = get_pickle_file(
+            self._project_id,
             self._unique_id,
             self._node.id,
             self._node.data.label
