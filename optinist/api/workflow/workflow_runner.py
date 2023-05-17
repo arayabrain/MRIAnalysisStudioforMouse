@@ -15,17 +15,19 @@ from optinist.api.experiment.experiment_writer import ExptConfigWriter
 
 class WorkflowRunner:
 
-    def __init__(self, unique_id: str, runItem: RunItem) -> None:
+    def __init__(self, project_id: str, unique_id: str, runItem: RunItem) -> None:
+        self.project_id = project_id
         self.unique_id = unique_id
         self.runItem = runItem
         self.nodeDict = ExptConfigReader.read_nodeDict(self.runItem.nodeDict)
         self.edgeDict = ExptConfigReader.read_edgeDict(self.runItem.edgeDict)
 
         ExptConfigWriter(
+            self.project_id,
             self.unique_id,
             self.runItem.name,
             self.nodeDict,
-            self.edgeDict
+            self.edgeDict,
         ).write()
 
     def run_workflow(self, background_tasks):
@@ -39,6 +41,7 @@ class WorkflowRunner:
         snakemake_params.forcerun = self.runItem.forceRunList
         if len(snakemake_params.forcerun) > 0:
             delete_dependencies(
+                project_id=self.project_id,
                 unique_id=self.unique_id,
                 smk_params=snakemake_params,
                 nodeDict=self.nodeDict,
@@ -46,6 +49,7 @@ class WorkflowRunner:
             )
         background_tasks.add_task(
             snakemake_execute,
+            self.project_id,
             self.unique_id,
             snakemake_params
         )
@@ -58,7 +62,7 @@ class WorkflowRunner:
             last_output=last_output,
         )
 
-        SmkConfigWriter.write(self.unique_id, asdict(flow_config))
+        SmkConfigWriter.write(self.project_id, self.unique_id, asdict(flow_config))
 
     def rulefile(self):
         endNodeList = self.get_endNodeList()
@@ -71,6 +75,7 @@ class WorkflowRunner:
         for node in self.nodeDict.values():
             if node.type == NodeType.IMAGE:
                 rule_dict[node.id] = SmkRule(
+                    project_id=self.project_id,
                     unique_id=self.unique_id,
                     node=node,
                     edgeDict=self.edgeDict,
@@ -78,6 +83,7 @@ class WorkflowRunner:
                 ).image()
             elif node.type == NodeType.CSV:
                 rule_dict[node.id] = SmkRule(
+                    project_id=self.project_id,
                     unique_id=self.unique_id,
                     node=node,
                     edgeDict=self.edgeDict,
@@ -85,6 +91,7 @@ class WorkflowRunner:
                 ).csv()
             elif node.type == NodeType.FLUO:
                 rule_dict[node.id] = SmkRule(
+                    project_id=self.project_id,
                     unique_id=self.unique_id,
                     node=node,
                     edgeDict=self.edgeDict,
@@ -92,6 +99,7 @@ class WorkflowRunner:
                 ).csv()
             elif node.type == NodeType.BEHAVIOR:
                 rule_dict[node.id] = SmkRule(
+                    project_id=self.project_id,
                     unique_id=self.unique_id,
                     node=node,
                     edgeDict=self.edgeDict,
@@ -99,6 +107,7 @@ class WorkflowRunner:
                 ).csv(nodeType="behavior")
             elif node.type == NodeType.HDF5:
                 rule_dict[node.id] = SmkRule(
+                    project_id=self.project_id,
                     unique_id=self.unique_id,
                     node=node,
                     edgeDict=self.edgeDict,
@@ -106,6 +115,7 @@ class WorkflowRunner:
                 ).hdf5()
             elif node.type == NodeType.ALGO:
                 rule = SmkRule(
+                    project_id=self.project_id,
                     unique_id=self.unique_id,
                     node=node,
                     edgeDict=self.edgeDict,

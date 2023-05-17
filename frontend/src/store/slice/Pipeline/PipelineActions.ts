@@ -13,17 +13,23 @@ import {
   selectPipelineLatestUid,
   selectRunResultPendingNodeIdList,
 } from './PipelineSelectors'
+import { selectCurrentProjectId } from '../Project/ProjectSelector'
 
 export const run = createAsyncThunk<
   string,
   { runPostData: RunPostData },
   ThunkApiConfig
 >(`${PIPELINE_SLICE_NAME}/run`, async ({ runPostData }, thunkAPI) => {
-  try {
-    const responseData = await runApi(runPostData)
-    return responseData
-  } catch (e) {
-    return thunkAPI.rejectWithValue(e)
+  const projectId = selectCurrentProjectId(thunkAPI.getState())
+  if (projectId) {
+    try {
+      const responseData = await runApi(projectId, runPostData)
+      return responseData
+    } catch (e) {
+      return thunkAPI.rejectWithValue(e)
+    }
+  } else {
+    return thunkAPI.rejectWithValue('projectId does not exist.')
   }
 })
 
@@ -34,16 +40,21 @@ export const runByCurrentUid = createAsyncThunk<
 >(
   `${PIPELINE_SLICE_NAME}/runByCurrentUid`,
   async ({ runPostData }, thunkAPI) => {
+    const projectId = selectCurrentProjectId(thunkAPI.getState())
     const currentUid = selectPipelineLatestUid(thunkAPI.getState())
-    if (currentUid != null) {
+    if (projectId && currentUid != null) {
       try {
-        const responseData = await runByUidApi(currentUid, runPostData)
+        const responseData = await runByUidApi(
+          projectId,
+          currentUid,
+          runPostData,
+        )
         return responseData
       } catch (e) {
         return thunkAPI.rejectWithValue(e)
       }
     } else {
-      return thunkAPI.rejectWithValue('currentUid dose not exist.')
+      return thunkAPI.rejectWithValue('projectId or currentUid dose not exist.')
     }
   },
 )
@@ -55,13 +66,22 @@ export const pollRunResult = createAsyncThunk<
   },
   ThunkApiConfig
 >(`${PIPELINE_SLICE_NAME}/pollRunResult`, async ({ uid }, thunkAPI) => {
+  const projectId = selectCurrentProjectId(thunkAPI.getState())
   const pendingNodeIdList = selectRunResultPendingNodeIdList(
     thunkAPI.getState(),
   )
-  try {
-    const responseData = await runResult({ uid, pendingNodeIdList })
-    return responseData
-  } catch (e) {
-    return thunkAPI.rejectWithValue(e)
+  if (projectId) {
+    try {
+      const responseData = await runResult({
+        projectId,
+        uid,
+        pendingNodeIdList,
+      })
+      return responseData
+    } catch (e) {
+      return thunkAPI.rejectWithValue(e)
+    }
+  } else {
+    return thunkAPI.rejectWithValue('projectId does not exist.')
   }
 })

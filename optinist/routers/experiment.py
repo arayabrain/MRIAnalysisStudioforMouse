@@ -15,17 +15,23 @@ from optinist.routers.model import DeleteItem
 router = APIRouter()
 
 
-@router.get("/experiments", response_model=Dict[str, ExptConfig], tags=['experiments'])
-async def get_experiments():
+@router.get(
+    "/experiments/{project_id}",
+    response_model=Dict[str, ExptConfig],
+    tags=['experiments']
+)
+async def get_experiments(project_id: str):
     exp_config = {}
-    config_paths = glob(join_filepath([DIRPATH.OUTPUT_DIR, "*", DIRPATH.EXPERIMENT_YML]))
+    config_paths = glob(
+        join_filepath([DIRPATH.OUTPUT_DIR, project_id, "*", DIRPATH.EXPERIMENT_YML])
+    )
     for path in config_paths:
         try:
             config = ExptConfigReader.read(path)
             config.nodeDict = []
             config.edgeDict = []
             exp_config[config.unique_id] = config
-        except Exception as e:
+        except Exception:
             pass
 
     return exp_config
@@ -45,12 +51,12 @@ async def import_experiment(unique_id: str):
 
 
 @router.get(
-    "/experiments/fetch", response_model=Optional[ExptConfig], tags=["experiments"]
+    "/experiments/fetch/{project_id}", response_model=Optional[ExptConfig], tags=["experiments"]
 )
-async def fetch_last_experiment():
+async def fetch_last_experiment(project_id: str):
     last_expt_config: Optional[ExptConfig] = None
     config_paths = glob(
-        join_filepath([DIRPATH.OUTPUT_DIR, "*", DIRPATH.EXPERIMENT_YML])
+        join_filepath([DIRPATH.OUTPUT_DIR, project_id, "*", DIRPATH.EXPERIMENT_YML])
     )
     for path in config_paths:
         config = ExptConfigReader.read(path)
@@ -68,7 +74,7 @@ async def delete_experiment(unique_id: str):
     try:
         shutil.rmtree(join_filepath([DIRPATH.OUTPUT_DIR, unique_id]))
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 

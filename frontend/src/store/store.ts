@@ -20,6 +20,7 @@ import {
   pipelineReducer,
   hdf5Reducer,
   experimentsReducer,
+  projectReducer,
 } from './slice'
 
 export const rootReducer = combineReducers({
@@ -38,6 +39,7 @@ export const rootReducer = combineReducers({
   pipeline: pipelineReducer,
   hdf5: hdf5Reducer,
   experiments: experimentsReducer,
+  project: projectReducer,
 })
 
 export const store = configureStore({

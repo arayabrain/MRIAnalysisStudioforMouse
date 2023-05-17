@@ -1,41 +1,17 @@
 import { Box, Button, styled } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import TableComponent, { Column } from '../../components/Table'
 import { useNavigate } from 'react-router-dom'
 import ModalDeleteAccount from 'components/ModalDeleteAccount'
-
-export type DataProject = {
-  id: number | string
-  uid?: number | string
-  name: string
-  project_type: number
-  image_count: number
-  created_time: string
-  updated_time: string
-  role?: string | number
-}
+import { selectProjectList } from 'store/slice/Project/ProjectSelector'
+import { deleteProject } from 'store/slice/Project/ProjectSlice'
 
 const Projects = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const projects = useSelector(selectProjectList)
   const [idDelete, setIdDelete] = useState<number | string | undefined>()
-  const [data, setData] = useState<DataProject[]>([
-    {
-      id: '1',
-      name: 'prj name 1',
-      created_time: '2023-03-10 09:19',
-      updated_time: '2023-03-10 09:19',
-      image_count: 3,
-      project_type: 0,
-    },
-    {
-      id: '2',
-      name: 'prj name 2',
-      created_time: '2023-03-10 09:19',
-      updated_time: '2023-03-10 09:19',
-      image_count: 3,
-      project_type: 1,
-    },
-  ])
 
   const onEdit = useCallback((id: number | string) => {
     navigate(`/projects/new-project?id=${id}`)
@@ -66,7 +42,7 @@ const Projects = () => {
   const onDeleteSubmit = () => {
     const id = idDelete
     setIdDelete(undefined)
-    setData(data.filter((e) => e.id !== id))
+    dispatch(deleteProject(id))
   }
 
   const handleCloseDelete = () => {
@@ -133,7 +109,7 @@ const Projects = () => {
       </BoxButton>
       <TableComponent
         paginate={{ total: 100, page: 1, page_size: 10 }}
-        data={data}
+        data={projects}
         columns={columns}
       />
     </ProjectsWrapper>

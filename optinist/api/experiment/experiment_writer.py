@@ -15,11 +15,13 @@ from optinist.api.workflow.workflow import Edge, Node
 class ExptConfigWriter:
     def __init__(
         self,
+        project_id: str,
         unique_id: str,
         name: str,
         nodeDict: Dict[str, Node],
         edgeDict: Dict[str, Edge],
     ) -> None:
+        self.project_id = project_id
         self.unique_id = unique_id
         self.name = name
         self.nodeDict = nodeDict
@@ -30,8 +32,9 @@ class ExptConfigWriter:
     def write(self) -> None:
         expt_filepath = join_filepath([
             DIRPATH.OUTPUT_DIR,
+            self.project_id,
             self.unique_id,
-            DIRPATH.EXPERIMENT_YML
+            DIRPATH.EXPERIMENT_YML,
         ])
         if os.path.exists(expt_filepath):
             expt_config = ExptConfigReader.read(expt_filepath)
@@ -43,7 +46,9 @@ class ExptConfigWriter:
         self.function_from_nodeDict()
 
         ConfigWriter.write(
-            dirname=join_filepath([DIRPATH.OUTPUT_DIR, self.unique_id]),
+            dirname=join_filepath(
+                [DIRPATH.OUTPUT_DIR, self.project_id, self.unique_id]
+            ),
             filename=DIRPATH.EXPERIMENT_YML,
             config=asdict(self.builder.build()),
         )

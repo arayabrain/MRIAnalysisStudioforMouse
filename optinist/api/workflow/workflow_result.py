@@ -16,10 +16,12 @@ from optinist.routers.fileIO.file_reader import Reader
 
 class WorkflowResult:
 
-    def __init__(self, unique_id):
+    def __init__(self, project_id, unique_id):
+        self.project_id = project_id
         self.unique_id = unique_id
         self.workflow_dirpath = join_filepath([
             DIRPATH.OUTPUT_DIR,
+            self.project_id,
             self.unique_id,
         ])
         self.expt_filepath = join_filepath([

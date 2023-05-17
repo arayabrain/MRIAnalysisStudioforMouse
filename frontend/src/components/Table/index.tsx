@@ -4,7 +4,7 @@ import ReactPaginate from 'react-paginate'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import { DataProject } from 'pages/Projects'
+import { ProjectType } from 'store/slice/Project/ProjectType'
 
 export type Column = {
   width?: number | string
@@ -14,14 +14,14 @@ export type Column = {
   align?: string
   filter?: boolean
   render?: (
-    item: DataProject,
+    item: ProjectType,
     value?: string | object | number,
     index?: number,
   ) => JSX.Element | null | undefined
 }
 
 type TableComponentProps = {
-  data?: DataProject[]
+  data?: ProjectType[]
   orderBy?: 'ASC' | 'DESC'
   orderKey?: string
   className?: string
@@ -51,8 +51,8 @@ const TableComponent: FC<TableComponentProps> = (props) => {
   const pageCount = (paginate?.total || 0) / (paginate?.page_size || 1)
 
   const renderCol = useCallback(
-    (col: Column, item: DataProject, index: number) => {
-      const value = item[(col.name || col.dataIndex || '') as keyof DataProject]
+    (col: Column, item: ProjectType, index: number) => {
+      const value = item[(col.name || col.dataIndex || '') as keyof ProjectType]
       if (col.render) return col.render(item, value, index)
       return value || null
     },
@@ -191,7 +191,7 @@ const Td = styled('td')(({ theme }) => ({
   padding: theme.spacing(2),
   borderBottom: '1px solid rgba(224, 224, 224, 1)',
   maxWidth: 155,
-  wordBreak: 'break-word'
+  wordBreak: 'break-word',
 }))
 
 const NoData = styled(Typography)({

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useSearchParams } from 'react-router-dom'
 
 import { selectRunPostData } from 'store/selectors/run/RunSelectors'
 import {
@@ -40,8 +41,10 @@ export function useRunPipeline() {
   const handleRunPipelineByUid = React.useCallback(() => {
     dispatch(runByCurrentUid({ runPostData }))
   }, [dispatch, runPostData])
+  const [searchParams] = useSearchParams()
   React.useEffect(() => {
-    dispatch(fetchExperiment())
+    const projectId = searchParams.get('id')
+    projectId && dispatch(fetchExperiment(projectId.toString()))
     // eslint-disable-next-line
   }, [])
   const handleCancelPipeline = React.useCallback(() => {

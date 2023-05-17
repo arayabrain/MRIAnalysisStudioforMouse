@@ -33,8 +33,10 @@ export type ExperimentDTO = {
   nodeDict: NodeDict
 }
 
-export async function getExperimentsApi(): Promise<ExperimentsDTO> {
-  const response = await axios.get(`${BASE_URL}/experiments`)
+export async function getExperimentsApi(
+  projectId: string,
+): Promise<ExperimentsDTO> {
+  const response = await axios.get(`${BASE_URL}/experiments/${projectId}`)
   return response.data
 }
 
@@ -59,8 +61,10 @@ export async function importExperimentByUidApi(
   return response.data
 }
 
-export async function fetchExperimentApi(): Promise<ExperimentDTO | null> {
-  const response = await axios.get(`${BASE_URL}/experiments/fetch`)
+export async function fetchExperimentApi(
+  projectId: string,
+): Promise<ExperimentDTO | null> {
+  const response = await axios.get(`${BASE_URL}/experiments/fetch/${projectId}`)
   return response.data
 }
 

@@ -15,7 +15,7 @@ import InputError from '../../components/common/InputError'
 import SelectError from '../../components/common/SelectError'
 import { createUser, deleteUser, editUser, listUser } from 'api/auth'
 import { useUser } from 'providers'
-import { DataProject } from 'pages/Projects'
+import { ProjectType } from 'store/slice/Project/ProjectType'
 import { isAdmin, optionsRole } from 'utils/auth'
 import Loading from '../../components/common/Loading'
 
@@ -304,7 +304,7 @@ const AccountManager = () => {
     setOpenDelete(true)
   }
 
-  const onForgotPassword = (data: DataProject) => {
+  const onForgotPassword = (data: ProjectType) => {
     let newData
     if (data.role === 'Admin') newData = { ...data, role: 1 }
     else if (data.role === 'Data Manager') newData = { ...data, role: 10 }
