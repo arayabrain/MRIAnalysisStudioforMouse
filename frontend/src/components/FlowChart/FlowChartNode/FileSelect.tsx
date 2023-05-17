@@ -1,13 +1,14 @@
+// TODO: Change for this file must be reverted before merge
 import React, { useContext } from 'react'
 import { Button, Typography } from '@mui/material'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
-import { FILE_TREE_TYPE } from 'api/files/Files'
+import { FILE_TREE_TYPE, FILE_TREE_TYPE_SET } from 'api/files/Files'
 import { LinearProgressWithLabel } from './LinerProgressWithLabel'
 import { FILE_TYPE } from 'store/slice/InputNode/InputNodeType'
 import { useFileUploader } from 'store/slice/FileUploader/FileUploaderHook'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { DialogContext } from '../DialogContext'
+import { getLabelByPath } from 'store/slice/FlowElement/FlowElementUtils'
+import { DialogContext } from 'components/FlowChart/DialogContext'
 
 export const FileSelect = React.memo<{
   multiSelect?: boolean
@@ -35,7 +36,6 @@ export const FileSelect = React.memo<{
         </div>
       )}
       <FileSelectImple
-        nodeId={nodeId}
         multiSelect={multiSelect}
         filePath={filePath}
         onSelectFile={onChangeFilePath}
@@ -60,52 +60,93 @@ type FileSelectImpleProps = {
   fileTreeType?: FILE_TREE_TYPE
   selectButtonLabel?: string
   uploadButtonLabel?: string
-  nodeId?: string
 }
 
 export const FileSelectImple = React.memo<FileSelectImpleProps>(
-  ({ filePath, nodeId }) => {
-    const navigate = useNavigate()
-    const [searchParams] = useSearchParams()
-    const { onOpenImageAlignment } = useContext(DialogContext)
-    const id = searchParams.get('id')
-    const getNameSelectec = () => {
-      if (Array.isArray(filePath)) {
-        return `${filePath.length} images selected.`
-      }
-      return `${filePath ? 1 : 0} images selected.`
-    }
+  ({
+    multiSelect = false,
+    filePath,
+    onSelectFile,
+    onUploadFile,
+    fileTreeType,
+    selectButtonLabel,
+    uploadButtonLabel,
+  }) => {
+    const { onOpenDialogFile } = useContext(DialogContext)
 
+    const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      event.preventDefault()
+      if (event.target.files != null && event.target.files[0] != null) {
+        const file = event.target.files[0]
+        const formData = new FormData()
+        formData.append('file', file)
+        const fileName = file.name
+        onUploadFile(formData, fileName)
+      }
+    }
+    const inputRef = React.useRef<HTMLInputElement>(null)
+    const onClick = () => {
+      if (inputRef.current != null) {
+        inputRef.current.click()
+      }
+    }
+    const accept = getFileInputAccept(fileTreeType)
+    const fileName = getLabelByPath(filePath)
     return (
-      <div style={{ padding: 16 }}>
-        <ButtonGroup size="small" style={{ width: '90%', margin: 'auto' }}>
+      <div
+        style={{
+          padding: 5,
+        }}
+      >
+        <ButtonGroup size="small" style={{ marginRight: 4 }}>
           <Button
-            style={{ width: '80%' }}
             variant="outlined"
-            onClick={() =>
-              navigate(
-                `/projects/new-project?id=${id}&back=/projects/workflow?tab=0&id=${id}`,
-              )
-            }
+            onClick={() => {
+              onOpenDialogFile({
+                open: true,
+                multiSelect,
+                filePath,
+                fileTreeType,
+                onSelectFile,
+              })
+            }}
           >
-            EDIT IMAGESET
+            {!!selectButtonLabel ? selectButtonLabel : 'Select File'}
+          </Button>
+          <Button onClick={onClick} variant="outlined">
+            {!!uploadButtonLabel ? uploadButtonLabel : 'Load'}
           </Button>
         </ButtonGroup>
-        <div style={{ marginTop: 8 }}>
+        <div>
+          <input
+            ref={inputRef}
+            type="file"
+            onChange={onFileInputChange}
+            accept={accept}
+            style={{
+              visibility: 'hidden',
+              width: 0,
+              height: 0,
+            }}
+          />
           <Typography className="selectFilePath" variant="caption">
-            {getNameSelectec()}
+            {!!fileName ? fileName : 'No file is selected.'}
           </Typography>
         </div>
-        <ButtonGroup size="small" style={{ width: '90%', margin: '8px 0' }}>
-          <Button
-            onClick={() => onOpenImageAlignment(true, { nodeId })}
-            style={{ width: '80%' }}
-            variant="outlined"
-          >
-            ALIGNMENT
-          </Button>
-        </ButtonGroup>
       </div>
     )
   },
 )
+
+function getFileInputAccept(fileType: FILE_TREE_TYPE | undefined) {
+  switch (fileType) {
+    case FILE_TREE_TYPE_SET.IMAGE:
+      return '.tif,.tiff'
+    case FILE_TREE_TYPE_SET.CSV:
+      return '.csv'
+    case FILE_TREE_TYPE_SET.HDF5:
+      return '.hdf5,.nwb'
+    default:
+      return undefined
+  }
+}
