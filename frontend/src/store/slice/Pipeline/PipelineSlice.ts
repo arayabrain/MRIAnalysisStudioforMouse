@@ -101,6 +101,7 @@ export const pipelineSlice = createSlice({
           state.run.status = RUN_STATUS.FINISHED
         }
       })
+      .addCase(fetchExperiment.rejected, (_state, _action) => initialState)
       .addMatcher(
         isAnyOf(run.pending, runByCurrentUid.pending),
         (state, action) => {

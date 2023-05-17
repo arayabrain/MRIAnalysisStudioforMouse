@@ -106,6 +106,7 @@ export const algorithmNodeSlice = createSlice({
           })
         return newState
       })
+      .addCase(fetchExperiment.rejected, (_state, _action) => initialState)
       .addMatcher(
         isAnyOf(run.fulfilled, runByCurrentUid.fulfilled),
         (state, action) => {

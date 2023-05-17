@@ -63,7 +63,7 @@ export async function importExperimentByUidApi(
 
 export async function fetchExperimentApi(
   projectId: string,
-): Promise<ExperimentDTO | null> {
+): Promise<ExperimentDTO> {
   const response = await axios.get(`${BASE_URL}/experiments/fetch/${projectId}`)
   return response.data
 }

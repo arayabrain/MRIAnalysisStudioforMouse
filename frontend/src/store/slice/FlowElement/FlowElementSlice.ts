@@ -253,7 +253,8 @@ export const flowElementSlice = createSlice({
         state.flowElements = newNodeList.concat(
           Object.values(action.payload.edgeDict),
         )
-      }),
+      })
+      .addCase(fetchExperiment.rejected, (_state, _action) => initialState),
 })
 
 function getRandomArbitrary(min: number, max: number) {

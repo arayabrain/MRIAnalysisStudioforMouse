@@ -94,7 +94,8 @@ export const rightDrawerSlice = createSlice({
       .addCase(importExperimentByUid.fulfilled, () => {
         return initialState
       })
-      .addCase(fetchExperiment.fulfilled, () => initialState)
+      .addCase(fetchExperiment.fulfilled, (_state, _action) => initialState)
+      .addCase(fetchExperiment.rejected, (_state, _action) => initialState)
   },
 })
 

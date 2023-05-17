@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 from datetime import datetime
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 
 import shutil
@@ -51,7 +51,7 @@ async def import_experiment(unique_id: str):
 
 
 @router.get(
-    "/experiments/fetch/{project_id}", response_model=Optional[ExptConfig], tags=["experiments"]
+    "/experiments/fetch/{project_id}", response_model=ExptConfig, tags=["experiments"]
 )
 async def fetch_last_experiment(project_id: str):
     last_expt_config: Optional[ExptConfig] = None
@@ -66,7 +66,10 @@ async def fetch_last_experiment(project_id: str):
             config.started_at, "%Y-%m-%d %H:%M:%S"
         ) > datetime.strptime(last_expt_config.started_at, "%Y-%m-%d %H:%M:%S"):
             last_expt_config = config
-    return last_expt_config
+    if last_expt_config:
+        return last_expt_config
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.delete("/experiments/{unique_id}", response_model=bool, tags=['experiments'])

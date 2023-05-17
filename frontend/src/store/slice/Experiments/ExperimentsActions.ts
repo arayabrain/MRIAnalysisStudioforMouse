@@ -36,7 +36,7 @@ export const fetchExperiment = createAsyncThunk<ExperimentDTO, string>(
   async (projectId, thunkAPI) => {
     try {
       const response = await fetchExperimentApi(projectId)
-      return response ?? thunkAPI.rejectWithValue('no project exist.')
+      return response
     } catch (e) {
       return thunkAPI.rejectWithValue(e)
     }
