@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     rule_config.input = info
 
-    outputfile = FileWriter.image(rule_config)
+    outputfile = FileWriter.image(rule_config, snakemake.params.name['params'])
     PickleWriter.write(rule_config.output, outputfile)
     # if rule_config.type in [FILETYPE.CSV, FILETYPE.BEHAVIOR]:
     #     outputfile = FileWriter.csv(rule_config, rule_config.type)

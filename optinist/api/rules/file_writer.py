@@ -38,8 +38,8 @@ class FileWriter:
         return info
 
     @classmethod
-    def image(cls, rule_config: Rule):
-        info = {rule_config.return_arg: ImageData(rule_config.input, "")}
+    def image(cls, rule_config: Rule, params: dict):
+        info = {rule_config.return_arg: ImageData(rule_config.input, file_name="", params=params)}
         nwbfile = rule_config.nwbfile
         nwbfile['image_series']['external_file'] = info[rule_config.return_arg]
         info['nwbfile'] = {'input': nwbfile}
