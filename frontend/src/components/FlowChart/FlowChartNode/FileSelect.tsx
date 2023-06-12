@@ -79,7 +79,6 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const { onOpenImageAlignment, images } = useContext(DialogContext)
-    const selectInput = useSelector(selectInputNodeById(nodeId || ''))
     const dispatch = useDispatch()
 
     const inputNode = useSelector(
@@ -90,16 +89,10 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
 
     useEffect(() => {
       if (!nodeId) return
-      const valueAlignments = (selectInput.param as AlignmentData)?.alignments
-        ?.value
       let newParams: Params[] = []
       if (Array.isArray(filePath)) {
         newParams = filePath.map((path: string) => {
           const image = images.find((image) => image.url === path)
-          const param = valueAlignments?.find(
-            (align) => align.image_id === path,
-          )
-          if (param) return param
           return {
             image_id: image?.id || path,
             x_pos: 0,
