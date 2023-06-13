@@ -38,8 +38,8 @@ const ImageAlignment: FC<ImageViewProps> = ({
   const [stateParams, setStateParams] = useState<Params[]>(params.alignments)
 
   const paramAligment = useMemo(() => {
-    return stateParams.find((param) => param.image_id === image.id)
-  }, [image.id, stateParams])
+    return stateParams.find((param) => param.image_id === image?.id)
+  }, [image?.id, stateParams])
 
   useEffect(() => {
     if (open) {

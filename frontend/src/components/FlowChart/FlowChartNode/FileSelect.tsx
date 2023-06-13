@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { Button, Typography } from '@mui/material'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
@@ -10,13 +10,10 @@ import {
   Params,
 } from 'store/slice/InputNode/InputNodeType'
 import { useFileUploader } from 'store/slice/FileUploader/FileUploaderHook'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { DialogContext } from '../DialogContext'
 import { useSelector } from 'react-redux'
-import {
-  selectInputNodeById,
-  selectInputNodeParam,
-} from 'store/slice/InputNode/InputNodeSelectors'
+import { selectInputNodeParam } from 'store/slice/InputNode/InputNodeSelectors'
 import { setInputNodeParamAlignment } from 'store/slice/InputNode/InputNodeSlice'
 import { useDispatch } from 'react-redux'
 
@@ -28,7 +25,6 @@ export const FileSelect = React.memo<{
   onChangeFilePath: (path: string | string[]) => void
 }>(({ multiSelect = false, filePath, nodeId, fileType, onChangeFilePath }) => {
   const {
-    // filePath: uploadedFilePath,
     onUploadFile,
     pending,
     uninitialized,
@@ -80,6 +76,11 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
     const [searchParams] = useSearchParams()
     const { onOpenImageAlignment, images } = useContext(DialogContext)
     const dispatch = useDispatch()
+    const location = useLocation()
+
+    const isEdited = useRef<{ edited: boolean }>(
+      location.state as { edited: boolean },
+    )
 
     const inputNode = useSelector(
       selectInputNodeParam(nodeId || ''),
@@ -88,7 +89,7 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
     const id = searchParams.get('id')
 
     useEffect(() => {
-      if (!nodeId) return
+      if (!nodeId || !!isEdited.current?.edited) return
       let newParams: Params[] = []
       if (Array.isArray(filePath)) {
         newParams = filePath.map((path: string) => {
@@ -132,6 +133,9 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
             onClick={() =>
               navigate(
                 `/projects/new-project?id=${id}&nodeId=${nodeId}&back=/projects/workflow?tab=0&id=${id}`,
+                {
+                  state: { edited: true },
+                },
               )
             }
           >
