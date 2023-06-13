@@ -86,20 +86,23 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
     useEffect(() => {
       if (!nodeId || !!isEdited.current?.edited) return
       let newParams: Params[] = []
+      const paramDefault = {
+        x_pos: 0,
+        x_resize: 1,
+        x_rotate: 0,
+        y_pos: 0,
+        y_resize: 1,
+        y_rotate: 0,
+        z_pos: 0,
+        z_resize: 1,
+        z_rotate: 0,
+      }
       if (Array.isArray(filePath)) {
         newParams = filePath.map((path: string) => {
           const image = images.find((image) => image.url === path)
           return {
             image_id: image?.id || path,
-            x_pos: 0,
-            x_resize: 1,
-            x_rotate: 0,
-            y_pos: 0,
-            y_resize: 1,
-            y_rotate: 0,
-            z_pos: 0,
-            z_resize: 1,
-            z_rotate: 0,
+            ...paramDefault,
           }
         })
       } else {
@@ -107,15 +110,7 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
         newParams = [
           {
             image_id: image?.id || filePath,
-            x_pos: 0,
-            x_resize: 1,
-            x_rotate: 0,
-            y_pos: 0,
-            y_resize: 1,
-            y_rotate: 0,
-            z_pos: 0,
-            z_resize: 1,
-            z_rotate: 0,
+            ...paramDefault,
           },
         ]
       }
