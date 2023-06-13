@@ -69,7 +69,7 @@ export function useRunPipeline() {
       appDispatch(getDatasetList({ project_id: projectId }))
         .unwrap()
         .then(({ dataset, last_updated_time }) => {
-          if (!isEdited) {
+          if (!isEdited?.edited) {
             appDispatch(fetchExperiment(projectId))
               .unwrap()
               .then(({ nodeDict, finished_at }) => {

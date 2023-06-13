@@ -19,7 +19,7 @@ import React, {
   useEffect,
   useMemo,
 } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { getNanoId } from 'utils/nanoid/NanoIdUtils'
 import {
   DatabaseData,
@@ -183,6 +183,7 @@ const ProjectFormComponent = () => {
   const nodeId = searchParams.get('nodeId')
   const isPendingDrag = useRef(false)
   const dispatch = useDispatch()
+  const location = useLocation()
 
   const dataset = useSelector(selectDataset)
   const currentProject = useSelector(selectCurrentProject)
@@ -207,8 +208,12 @@ const ProjectFormComponent = () => {
   const timeoutClick = useRef<NodeJS.Timeout | undefined>()
   const navigate = useNavigate()
   const [isEditName, setIsEditName] = useState(false)
+  const isEditedWorkflow = useRef<{ edited: boolean }>(
+    location.state as { edited: boolean },
+  )
 
   useEffect(() => {
+    window.addEventListener('beforeunload', removeStateIsEdit)
     if (!idEdit) return
     setLoading(true)
     dispatch(getDatasetList({ project_id: idEdit }))
@@ -219,11 +224,16 @@ const ProjectFormComponent = () => {
       }),
     )
     return () => {
+      window.removeEventListener('beforeunload', removeStateIsEdit)
       dispatch(resetCurrentProject())
       dispatch(reset())
     }
     //eslint-disable-next-line
   }, [])
+
+  const removeStateIsEdit = () => {
+    navigate(location.pathname, { replace: true })
+  }
 
   useEffect(() => {
     const { datasets, ids } = remapDatasetToDataFactor(dataset)
@@ -646,7 +656,7 @@ const ProjectFormComponent = () => {
                 ])
                 if (routeGoback) {
                   navigate(`${routeGoback}&id=${idEdit}`, {
-                    state: { edited: true },
+                    state: { edited: !!isEditedWorkflow.current?.edited },
                   })
                 }
               } else {
@@ -836,7 +846,12 @@ const ProjectFormComponent = () => {
           justifyContent: 'flex-end',
         }}
       >
-        <ButtonFilter onClick={onOk} sx={{ backgroundColor: 'limegreen !important' }}>{idEdit ? 'Ok' : 'Add'}</ButtonFilter>
+        <ButtonFilter
+          onClick={onOk}
+          sx={{ backgroundColor: 'limegreen !important' }}
+        >
+          {idEdit ? 'Ok' : 'Add'}
+        </ButtonFilter>
         <ButtonFilter onClick={onCancle}>Cancel</ButtonFilter>
       </Box>
       {loading && <Loading />}

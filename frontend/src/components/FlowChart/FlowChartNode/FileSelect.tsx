@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { Button, Typography } from '@mui/material'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
@@ -10,7 +10,7 @@ import {
   Params,
 } from 'store/slice/InputNode/InputNodeType'
 import { useFileUploader } from 'store/slice/FileUploader/FileUploaderHook'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { DialogContext } from '../DialogContext'
 import { useSelector } from 'react-redux'
 import {
@@ -81,6 +81,11 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
     const { onOpenImageAlignment, images } = useContext(DialogContext)
     const selectInput = useSelector(selectInputNodeById(nodeId || ''))
     const dispatch = useDispatch()
+    const location = useLocation()
+
+    const isEdited = useRef<{ edited: boolean }>(
+      location.state as { edited: boolean },
+    )
 
     const inputNode = useSelector(
       selectInputNodeParam(nodeId || ''),
@@ -89,7 +94,7 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
     const id = searchParams.get('id')
 
     useEffect(() => {
-      if (!nodeId) return
+      if (!nodeId || !!isEdited.current?.edited) return
       const valueAlignments = (selectInput.param as AlignmentData)?.alignments
         ?.value
       let newParams: Params[] = []
@@ -139,6 +144,9 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
             onClick={() =>
               navigate(
                 `/projects/new-project?id=${id}&nodeId=${nodeId}&back=/projects/workflow?tab=0&id=${id}`,
+                {
+                  state: { edited: true },
+                },
               )
             }
           >
