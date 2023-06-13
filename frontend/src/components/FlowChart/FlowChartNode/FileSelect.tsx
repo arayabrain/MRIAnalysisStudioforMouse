@@ -114,7 +114,7 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
         }),
       )
       //eslint-disable-next-line
-    }, [filePath, nodeId])
+    }, [filePath, nodeId, JSON.stringify(images)])
 
     const getNameSelectec = () => {
       if (Array.isArray(filePath)) {

@@ -50,7 +50,10 @@ import {
 import Loading from 'components/common/Loading'
 import { getDataBaseTree } from 'api/rawdb'
 import { DATABASE_URL_HOST } from 'const/API'
-import { selectDataset } from 'store/slice/Dataset/DatasetSelector'
+import {
+  getUrlFromSubfolder,
+  selectDataset,
+} from 'store/slice/Dataset/DatasetSelector'
 import { useSelector } from 'react-redux'
 import { Dataset } from 'store/slice/Dataset/DatasetType'
 import { selectCurrentProject } from 'store/slice/Project/ProjectSelector'
@@ -58,6 +61,7 @@ import { resetCurrentProject } from 'store/slice/Project/ProjectSlice'
 import { reset } from 'store/slice/Dataset/DatasetSlice'
 import { setInputNodeFilePath } from 'store/slice/InputNode/InputNodeActions'
 import { setLoadingExpriment } from 'store/slice/Experiments/ExperimentsSlice'
+import { getDatasetListApi } from 'api/dataset'
 
 const columns: Column[] = [
   { title: 'Lab', name: 'lab_name', filter: true, width: 100 },
@@ -632,15 +636,11 @@ const ProjectFormComponent = () => {
           callback: async (isSuccess: boolean) => {
             if (isSuccess) {
               if (nodeId) {
-                const urls = dataFactors
-                  .map((el) => {
-                    if (el.data.length) return el.data
-                    return el.within.map((w) => w.data).flat()
-                  })
-                  .flat()
-                  .map((image) => image.image_url)
+                const response = await getDatasetListApi(idEdit)
+                let urls: { id: string | number; url: string }[] = []
+                getUrlFromSubfolder(response.records, urls)
                 await Promise.all([
-                  dispatch(setInputNodeFilePath({ nodeId, filePath: urls })),
+                  dispatch(setInputNodeFilePath({ nodeId, filePath: urls.map(({ url }) => url) })),
                   dispatch(getDatasetList({ project_id: idEdit })),
                   dispatch(setLoadingExpriment({ loading: false })),
                 ])

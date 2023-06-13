@@ -15,6 +15,7 @@ import {
   RecordList,
   SessionsDatabase,
 } from 'pages/Database'
+import React from 'react'
 
 type Object = {
   [key: string]: Object | string
@@ -549,7 +550,7 @@ const DatabaseTableComponent: FC<TableComponentProps> = (props) => {
                         transform: `rotate(${orderBy === 'ASC' ? 180 : 0}deg)`,
                         opacity:
                           orderBy && nameCol === orderKey && col.filter ? 1 : 0,
-                    }}
+                      }}
                     />
                   </Th>
                 )
@@ -621,9 +622,9 @@ const BoxDrag = styled(Box)({
 
 const TableWrap = styled(Box, {
   shouldForwardProp: (props) => props !== 'addProject',
-})<{addProject: boolean}>(({addProject}) => ({
+})<{ addProject: boolean }>(({ addProject }) => ({
   overflowX: 'scroll',
-  height: `calc(100vh - ${addProject ? 365 : 200}px)`
+  height: `calc(100vh - ${addProject ? 365 : 200}px)`,
 }))
 
 const DataTable = styled('table')({
@@ -680,4 +681,4 @@ const BoxCenter = styled(Box)({
   alignItems: 'center',
 })
 
-export default DatabaseTableComponent
+export default React.memo(DatabaseTableComponent)

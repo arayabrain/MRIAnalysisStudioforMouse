@@ -304,9 +304,13 @@ const Database = () => {
   const [viewer, setViewer] = useState<Viewer>({ open: false, url: '' })
   const [databases, setDatabases] = useState<DatabaseData | DatabaseListData>()
   const [openDelete, setOpenDelete] = useState(false)
-  const [orderBy, setOrdeBy] = useState<'ASC' | 'DESC' | ''>('')
-  const [columnSort, setColumnSort] = useState<string>('')
-  const [type, setType] = useState<'tree' | 'list'>('tree')
+  const [{ orderBy, type, columnSort }, setOrderByAndTypeAndSort] = useState<{
+    orderBy: 'ASC' | 'DESC' | ''
+    type: 'tree' | 'list'
+    columnSort: string
+  }>({ orderBy: '', type: 'tree', columnSort: '' })
+
+  // const [columnSort, setColumnSort] = useState<string>('')
   const [initDataTable, setInitDataTable] =
     useState<DatabaseData>(defaultDatabase)
   const [disabled, setDisabled] = useState({ left: false, right: false })
@@ -368,8 +372,11 @@ const Database = () => {
       type,
     )
     setDatabases({ ...databases, records: data as any })
-    setColumnSort(orderKey)
-    setOrdeBy(orderByValue)
+    setOrderByAndTypeAndSort((pre) => ({
+      ...pre,
+      orderBy: orderByValue,
+      columnSort: orderKey,
+    }))
   }
 
   const onNext = async () => {
@@ -394,6 +401,10 @@ const Database = () => {
     setParams(newParams)
   }
 
+  const setType = (type: 'tree' | 'list') => {
+    setOrderByAndTypeAndSort({ type, orderBy: '', columnSort: '' })
+  }
+
   return (
     <DatabaseWrapper>
       <ModalDeleteAccount
@@ -414,10 +425,7 @@ const Database = () => {
       </ProjectsTitle>
       <BoxSelectTypeView>
         <Box
-          onClick={() => {
-            setOrdeBy('')
-            setType('tree')
-          }}
+          onClick={() => setType('tree')}
           style={{
             marginRight: 4,
             fontWeight: type === 'tree' ? 700 : 500,
@@ -429,10 +437,7 @@ const Database = () => {
         </Box>
         /
         <Box
-          onClick={() => {
-            setOrdeBy('')
-            setType('list')
-          }}
+          onClick={() => setType('list')}
           style={{
             marginLeft: 4,
             fontWeight: type === 'list' ? 700 : 500,

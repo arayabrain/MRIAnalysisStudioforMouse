@@ -62,6 +62,7 @@ export function useRunPipeline() {
     location.state as { edited: boolean },
   )
   React.useEffect(() => {
+    window.addEventListener('beforeunload', removeStateIsEdit)
     if (!projectId) {
       navigate('/projects')
     } else {
@@ -94,9 +95,14 @@ export function useRunPipeline() {
     return () => {
       dispatch(reset())
       dispatch(setLoadingExpriment({ loading: true }))
+      window.removeEventListener('beforeunload', removeStateIsEdit)
     }
     //eslint-disable-next-line
   }, [])
+
+  const removeStateIsEdit = () => {
+    navigate(location.pathname, { replace: true })
+  }
 
   const handleCancelPipeline = React.useCallback(() => {
     if (uid != null) {
