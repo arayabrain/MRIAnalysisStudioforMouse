@@ -24,13 +24,8 @@ export const FileSelect = React.memo<{
   nodeId?: string
   onChangeFilePath: (path: string | string[]) => void
 }>(({ multiSelect = false, filePath, nodeId, fileType, onChangeFilePath }) => {
-  const {
-    onUploadFile,
-    pending,
-    uninitialized,
-    progress,
-    error,
-  } = useFileUploader({ fileType, nodeId })
+  const { onUploadFile, pending, uninitialized, progress, error } =
+    useFileUploader({ fileType, nodeId })
   const onUploadFileHandle = (formData: FormData, fileName: string) => {
     onUploadFile(formData, fileName)
   }
@@ -107,6 +102,22 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
             z_rotate: 0,
           }
         })
+      } else {
+        const image = images.find((image) => image.url === filePath)
+        newParams = [
+          {
+            image_id: image?.id || filePath,
+            x_pos: 0,
+            x_resize: 1,
+            x_rotate: 0,
+            y_pos: 0,
+            y_resize: 1,
+            y_rotate: 0,
+            z_pos: 0,
+            z_resize: 1,
+            z_rotate: 0,
+          },
+        ]
       }
       dispatch(
         setInputNodeParamAlignment({
