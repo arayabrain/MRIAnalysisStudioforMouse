@@ -1,25 +1,11 @@
-FROM python:3.9.7-slim
+FROM --platform=linux/amd64 python:3.8.16-slim
 
-COPY requirements.txt /app/requirements.txt
+WORKDIR /app
 
-RUN apt-get --allow-releaseinfo-change update && \
-    apt-get install --no-install-recommends -y git gcc g++ libgl1 libgl1-mesa-dev && \
-    pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir -r /app/requirements.txt && \
-    pip3 install --no-cache-dir \
-        cython==0.29.30 \
-        holoviews==1.14.9 \
-        ipyparallel==8.4.1 \
-        matplotlib==3.5.2 \
-        opencv-python==4.6.0.66 \
-        scikit-image==0.18.0 \
-        scikit-learn==1.1.1 \
-        tensorflow==2.9.1 && \
-        watershed==2.2.2 \
-    pip3 install --no-cache-dir git+https://github.com/flatironinstitute/CaImAn.git@914324989443fac5d481ef32aad4f327701294a8#egg=caiman && \
-    apt-get purge git -y && apt-get autoremove -y && apt-get clean && rm -rf /root/.cache/pip/*
+COPY requirements.txt .
 
 RUN mkdir -p /root/miniconda3 && \
+    apt-get --allow-releaseinfo-change update && \
     apt-get install --no-install-recommends -y wget && \
     wget -q https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh && \
     apt-get purge wget -y && apt-get autoremove -y && apt-get clean && \
@@ -30,13 +16,18 @@ RUN mkdir -p /root/miniconda3 && \
     conda config --set channel_priority strict && \
     conda clean -y --tarballs
 
-COPY frontend/build /app/frontend/build
-COPY studio /app/studio
-COPY main.py /app/main.py
-
 ENV PATH $PATH:/root/miniconda3/bin
-WORKDIR /app
-EXPOSE 8000
 
-ENTRYPOINT ["python3", "main.py"]
-CMD ["--host", "0.0.0.0"]
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY optinist ./optinist
+
+COPY backend ./backend
+
+COPY frontend/build ./frontend/build
+
+COPY sample_data ./sample_data
+
+COPY main.py firebase_config.json firebase_private.json .env ./
+
+EXPOSE 8000

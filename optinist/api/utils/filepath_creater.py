@@ -16,8 +16,9 @@ def create_filepath(dirname, filename):
     return join_filepath([dirname, filename])
 
 
-def get_pickle_file(unique_id, node_id, algo_name):
+def get_pickle_file(project_id, unique_id, node_id, algo_name):
     return join_filepath([
+        project_id,
         unique_id,
         node_id,
         f"{algo_name}.pkl"

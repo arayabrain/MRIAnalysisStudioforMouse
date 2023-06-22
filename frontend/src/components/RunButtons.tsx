@@ -25,7 +25,7 @@ import {
   RUN_BTN_OPTIONS,
   RUN_BTN_TYPE,
 } from 'store/slice/Pipeline/PipelineType'
-import { selectPipelineRunBtn } from 'store/slice/Pipeline/PipelineSelectors'
+import { selectPipelineRunBtn, selectRunAlreadyDisabled } from 'store/slice/Pipeline/PipelineSelectors'
 import { setRunBtnOption } from 'store/slice/Pipeline/PipelineSlice'
 
 export const RunButtons = React.memo<UseRunPipelineReturnType>((props) => {
@@ -42,6 +42,7 @@ export const RunButtons = React.memo<UseRunPipelineReturnType>((props) => {
   const dispatch = useDispatch()
 
   const runBtnOption = useSelector(selectPipelineRunBtn)
+  const runAlreadyDisabled = useSelector(selectRunAlreadyDisabled)
 
   const [dialogOpen, setDialogOpen] = React.useState(false)
   const { enqueueSnackbar } = useSnackbar()
@@ -132,7 +133,7 @@ export const RunButtons = React.memo<UseRunPipelineReturnType>((props) => {
                     <MenuItem
                       key={option}
                       disabled={
-                        !uidExists && option === RUN_BTN_OPTIONS.RUN_ALREADY
+                        (!uidExists || runAlreadyDisabled) && option === RUN_BTN_OPTIONS.RUN_ALREADY
                       }
                       selected={option === runBtnOption}
                       onClick={(event) => handleMenuItemClick(event, option)}

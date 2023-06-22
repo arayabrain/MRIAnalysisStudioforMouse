@@ -5,7 +5,7 @@ from optinist.api.config.config_writer import ConfigWriter
 
 class SmkConfigWriter:
     @classmethod
-    def write(cls, unique_id, flow_config):
+    def write(cls, project_id, unique_id, flow_config):
         ConfigWriter.write(
             dirname=DIRPATH.ROOT_DIR,
             filename=DIRPATH.SNAKEMAKE_CONFIG_YML,
@@ -13,7 +13,7 @@ class SmkConfigWriter:
         )
 
         ConfigWriter.write(
-            dirname=join_filepath([DIRPATH.OUTPUT_DIR, unique_id]),
+            dirname=join_filepath([DIRPATH.OUTPUT_DIR, project_id, unique_id]),
             filename=DIRPATH.SNAKEMAKE_CONFIG_YML,
             config=flow_config
         )

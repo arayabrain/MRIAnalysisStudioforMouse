@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+import pathlib
 
 
 def create_images_list(data):
@@ -19,3 +20,22 @@ def create_images_list(data):
         images.append(_img.tolist())
 
     return images
+
+
+def check_path_format(paths):
+    """
+    Convert the path to follow the POSIX format, and remove redundant tokens.
+
+    [arguments]
+    paths: A string of path or a list of paths.
+    """
+
+    if isinstance(paths, list):
+        output_paths = []
+        for path in paths:
+            output_paths.append(str(pathlib.Path(path).resolve()).replace('\\', '/'))
+        return output_paths
+    elif isinstance(paths, str):
+        return str(pathlib.Path(paths).resolve()).replace('\\', '/')
+    else:
+        return None

@@ -42,16 +42,20 @@ export interface AlgorithmNodePostData extends AlgorithmNodeData {
   param: ParamMap
 }
 
-export async function runApi(data: RunPostData): Promise<string> {
-  const response = await axios.post(`${BASE_URL}/run`, data)
+export async function runApi(
+  projectId: string,
+  data: RunPostData,
+): Promise<string> {
+  const response = await axios.post(`${BASE_URL}/run/${projectId}`, data)
   return response.data
 }
 
 export async function runByUidApi(
+  projectId: string,
   uid: string,
   data: Omit<RunPostData, 'name'>,
 ): Promise<string> {
-  const response = await axios.post(`${BASE_URL}/run/${uid}`, data)
+  const response = await axios.post(`${BASE_URL}/run/${projectId}/${uid}`, data)
   return response.data
 }
 
@@ -72,12 +76,16 @@ export type OutputPathsDTO = {
 }
 
 export async function runResult(data: {
+  projectId: string
   uid: string
   pendingNodeIdList: string[]
 }): Promise<RunResultDTO> {
-  const { uid, pendingNodeIdList } = data
-  const response = await axios.post(`${BASE_URL}/run/result/${uid}`, {
-    pendingNodeIdList,
-  })
+  const { projectId, uid, pendingNodeIdList } = data
+  const response = await axios.post(
+    `${BASE_URL}/run/result/${projectId}/${uid}`,
+    {
+      pendingNodeIdList,
+    },
+  )
   return response.data
 }

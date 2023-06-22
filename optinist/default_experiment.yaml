@@ -1,0 +1,248 @@
+edgeDict:
+  ? reactflow__edge-input_0input_0--image--ImageData-suite2p_file_convert_25pzk690c8suite2p_file_convert_25pzk690c8--image--ImageData
+  : animated: false
+    id: reactflow__edge-input_0input_0--image--ImageData-suite2p_file_convert_25pzk690c8suite2p_file_convert_25pzk690c8--image--ImageData
+    source: input_0
+    sourceHandle: input_0--image--ImageData
+    style:
+      border: null
+      borderRadius: null
+      height: null
+      padding: null
+      width: 5
+    target: suite2p_file_convert_25pzk690c8
+    targetHandle: suite2p_file_convert_25pzk690c8--image--ImageData
+    type: buttonedge
+  ? reactflow__edge-suite2p_file_convert_25pzk690c8suite2p_file_convert_25pzk690c8--ops--Suite2pData-suite2p_registration_zf22lm1eg6suite2p_registration_zf22lm1eg6--ops--Suite2pData
+  : animated: false
+    id: reactflow__edge-suite2p_file_convert_25pzk690c8suite2p_file_convert_25pzk690c8--ops--Suite2pData-suite2p_registration_zf22lm1eg6suite2p_registration_zf22lm1eg6--ops--Suite2pData
+    source: suite2p_file_convert_25pzk690c8
+    sourceHandle: suite2p_file_convert_25pzk690c8--ops--Suite2pData
+    style:
+      border: null
+      borderRadius: null
+      height: null
+      padding: null
+      width: 5
+    target: suite2p_registration_zf22lm1eg6
+    targetHandle: suite2p_registration_zf22lm1eg6--ops--Suite2pData
+    type: buttonedge
+nodeDict:
+  input_0:
+    data:
+      fileType: image
+      hdf5Path: null
+      label: '1'
+      param:
+        alignments:
+          path: alignments
+          type: child
+          value: []
+      path:
+      - /workdb/image/2/1
+      type: input
+    id: input_0
+    position:
+      x: 50
+      y: 150
+    style:
+      border: '1px solid #777'
+      borderRadius: null
+      height: 130
+      padding: null
+      width: null
+    type: ImageFileNode
+  suite2p_file_convert_25pzk690c8:
+    data:
+      fileType: null
+      hdf5Path: null
+      label: suite2p_file_convert
+      param:
+        batch_size:
+          path: batch_size
+          type: child
+          value: 500
+        do_registration:
+          path: do_registration
+          type: child
+          value: 1
+        force_sktiff:
+          path: force_sktiff
+          type: child
+          value: false
+        nchannels:
+          path: nchannels
+          type: child
+          value: 1
+        nplanes:
+          path: nplanes
+          type: child
+          value: 1
+      path: suite2p/suite2p_file_convert
+      type: algorithm
+    id: suite2p_file_convert_25pzk690c8
+    position:
+      x: 417
+      y: 166
+    style:
+      border: null
+      borderRadius: 0
+      height: 100
+      padding: 0
+      width: 180
+    type: AlgorithmNode
+  suite2p_registration_zf22lm1eg6:
+    data:
+      fileType: null
+      hdf5Path: null
+      label: suite2p_registration
+      param:
+        1Preg:
+          path: 1Preg
+          type: child
+          value: false
+        align_by_chan:
+          path: align_by_chan
+          type: child
+          value: 1
+        bidi_corrected:
+          path: bidi_corrected
+          type: child
+          value: false
+        bidiphase:
+          path: bidiphase
+          type: child
+          value: 0
+        block_size:
+          path: block_size
+          type: child
+          value:
+          - 128
+          - 128
+        diameter:
+          path: diameter
+          type: child
+          value: 0
+        do_bidiphase:
+          path: do_bidiphase
+          type: child
+          value: false
+        frames_include:
+          path: frames_include
+          type: child
+          value: -1
+        functional_chan:
+          path: functional_chan
+          type: child
+          value: 1
+        keep_movie_raw:
+          path: keep_movie_raw
+          type: child
+          value: false
+        maxregshift:
+          path: maxregshift
+          type: child
+          value: 0.1
+        maxregshiftNR:
+          path: maxregshiftNR
+          type: child
+          value: 5
+        nonrigid:
+          path: nonrigid
+          type: child
+          value: true
+        pre_smooth:
+          path: pre_smooth
+          type: child
+          value: 0
+        reg_tif:
+          path: reg_tif
+          type: child
+          value: false
+        smooth_sigma:
+          path: smooth_sigma
+          type: child
+          value: 1.15
+        smooth_sigma_time:
+          path: smooth_sigma_time
+          type: child
+          value: 0
+        snr_thresh:
+          path: snr_thresh
+          type: child
+          value: 1.2
+        spatial_hp_reg:
+          path: spatial_hp_reg
+          type: child
+          value: 42
+        spatial_taper:
+          path: spatial_taper
+          type: child
+          value: 40
+        th_badframes:
+          path: th_badframes
+          type: child
+          value: 1
+      path: suite2p/suite2p_registration
+      type: algorithm
+    id: suite2p_registration_zf22lm1eg6
+    position:
+      x: 671
+      y: 183
+    style:
+      border: null
+      borderRadius: 0
+      height: 100
+      padding: 0
+      width: 180
+    type: AlgorithmNode
+function:
+  input_0:
+    finished_at: '2023-06-06 19:22:45'
+    hasNWB: false
+    message: null
+    name: '1'
+    outputPaths: null
+    started_at: '2023-06-06 19:22:45'
+    subjects: null
+    success: success
+    unique_id: input_0
+  suite2p_file_convert_25pzk690c8:
+    finished_at: '2023-06-06 19:23:10'
+    hasNWB: false
+    message: suite2p_file_convert success
+    name: suite2p_file_convert
+    outputPaths:
+      meanImg:
+        max_index: 1
+        path: /Users/rei_hashimoto/GitHub/MRIAnalysisStudioforMouse/files/output/2/d160e794/suite2p_file_convert_25pzk690c8/meanImg.json
+        type: images
+    started_at: '2023-06-06 19:22:52'
+    subjects: null
+    success: success
+    unique_id: suite2p_file_convert_25pzk690c8
+  suite2p_registration_zf22lm1eg6:
+    finished_at: '2023-06-06 19:23:21'
+    hasNWB: false
+    message: suite2p_registration success
+    name: suite2p_registration
+    outputPaths:
+      meanImgE:
+        max_index: 1
+        path: /Users/rei_hashimoto/GitHub/MRIAnalysisStudioforMouse/files/output/2/d160e794/suite2p_registration_zf22lm1eg6/meanImgE.json
+        type: images
+      refImg:
+        max_index: 1
+        path: /Users/rei_hashimoto/GitHub/MRIAnalysisStudioforMouse/files/output/2/d160e794/suite2p_registration_zf22lm1eg6/refImg.json
+        type: images
+    started_at: '2023-06-06 19:23:15'
+    subjects: null
+    success: success
+    unique_id: suite2p_registration_zf22lm1eg6
+project_id: default
+unique_id: default
+started_at: '2023-06-06 19:22:45'
+finished_at: '2023-06-06 19:23:21'
+success: success
+hasNWB: true
+name: New flow

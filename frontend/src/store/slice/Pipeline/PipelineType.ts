@@ -1,5 +1,7 @@
 import { RunPostData } from 'api/run/Run'
 import { DATA_TYPE } from '../DisplayData/DisplayDataType'
+import { SubFolder } from '../Dataset/DatasetType'
+import { ExperimentDTO } from 'api/experiments/Experiments'
 
 export const PIPELINE_SLICE_NAME = 'pipeline'
 
@@ -9,6 +11,7 @@ export type Pipeline = {
     uid: string
   }
   runBtn: RUN_BTN_TYPE
+  runAlreadyDisabled?: boolean
 }
 
 export const RUN_STATUS = {
@@ -116,3 +119,9 @@ export const RUN_BTN_LABELS = {
   [RUN_BTN_OPTIONS.RUN_NEW]: 'RUN ALL',
   [RUN_BTN_OPTIONS.RUN_ALREADY]: 'RUN',
 } as const
+
+export type DataPipeLine = {
+  dataset?: SubFolder[]
+  experiment: ExperimentDTO | undefined
+  isUpdateDataset: boolean
+}

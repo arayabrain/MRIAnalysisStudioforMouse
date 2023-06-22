@@ -60,21 +60,33 @@ studio also supports reproducibility of scientific research, standardization of 
 
 
 ## Installation
-Need anaconda or miniconda environment.
-```
-conda create -n studio python=3.8
-conda activate studio
-```
+- Copy `.env.example` to `.env` and replace `SECRET_KEY` in `.env` with your SECRET_KEY.
+  - To create random SECRET_KEY:
+    ```
+    openssl rand -hex 32
+    ```
+- Copy `firebase_config.example.json` to `firebase_config.json` and replace content of `firebase_config.json` with your Firebase config.
+- Copy `firebase_private.example.json` to `firebase_private.json` and replace content of `firebase_private.json` with your Firebase private key.
 
-Install from pip.
-```
-pip install studio
-```
+**Docker required**
+- On Linux or macOS:
+  - Grant execute permission to the run_app.sh file (only run for the first time):
+    ```
+    chmod +x run_app.sh
+    ```
 
-launch.
-```
-run_studio
-```
+  - Run the file to set up and start the app:
+
+    ```
+    ./run_app.sh
+    ```
+- On Windows:
+  - Open Command Prompt or PowerShell and navigate to the folder containing the run_app.sh file. Run the file to set up and start the app:
+    ```
+    bash run_app.sh
+    ```
+    _Note that to use this command, you need to install Git Bash environment on Windows or use Windows Subsystem for Linux (WSL)._
+
 
 Open browser. http://localhost:8000
 

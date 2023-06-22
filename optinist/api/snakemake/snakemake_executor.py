@@ -11,18 +11,19 @@ from optinist.api.utils.filepath_creater import get_pickle_file, join_filepath
 from optinist.api.workflow.workflow import Edge, Node
 
 
-def snakemake_execute(unique_id: str, params: SmkParam):
+def snakemake_execute(project_id: str, unique_id: str, params: SmkParam):
     snakemake(
         DIRPATH.SNAKEMAKE_FILEPATH,
         forceall=params.forceall,
         cores=params.cores,
         use_conda=params.use_conda,
         workdir=f"{os.path.dirname(DIRPATH.ROOT_DIR)}",
-        log_handler=[Logger(unique_id).smk_logger],
+        log_handler=[Logger(project_id, unique_id).smk_logger],
     )
 
 
 def delete_dependencies(
+    project_id: str,
     unique_id: str,
     smk_params: SmkParam,
     nodeDict: Dict[str, Node],
@@ -45,6 +46,7 @@ def delete_dependencies(
         pickle_filepath = join_filepath([
             DIRPATH.OUTPUT_DIR,
             get_pickle_file(
+                project_id=project_id,
                 unique_id=unique_id,
                 node_id=node_id,
                 algo_name=algo_name,

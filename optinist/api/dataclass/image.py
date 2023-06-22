@@ -11,11 +11,11 @@ from optinist.api.dataclass.base import BaseData
 
 
 class ImageData(BaseData):
-    def __init__(self, data, file_name='image'):
+    def __init__(self, data, file_name='image', params={}):
         super().__init__(file_name)
 
         self.json_path = None
-
+        self.params = params
         if data is None:
             self.path = None
         elif isinstance(data, str):

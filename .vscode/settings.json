@@ -3,5 +3,6 @@
     "frontend/build/**": true,
     "build/**": true
   },
-  "esbonio.sphinx.confDir": ""
+  "esbonio.sphinx.confDir": "",
+  "nuxt.isNuxtApp": false
 }

@@ -1,6 +1,6 @@
 export const EXPERIMENTS_SLICE_NAME = 'experiments'
 
-export type Experiments =
+export type Experiments = (
   | {
       status: 'fulfilled'
       experimentList: ExperimentListType
@@ -15,6 +15,7 @@ export type Experiments =
       status: 'error'
       message?: string
     }
+) & { loading: boolean }
 
 export type ExperimentListType = {
   [uid: string]: ExperimentType
@@ -25,6 +26,7 @@ export type ExperimentType = {
   functions: {
     [nodeId: string]: ExperimentFunction
   }
+  status?: EXPERIMENTS_STATUS
   name: string
   timestamp: string
   hasNWB: boolean

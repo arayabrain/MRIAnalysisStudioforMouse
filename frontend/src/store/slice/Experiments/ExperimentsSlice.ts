@@ -1,11 +1,15 @@
-import { createSlice, isAnyOf } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice, isAnyOf } from '@reduxjs/toolkit'
 import { EXPERIMENTS_SLICE_NAME, Experiments } from './ExperimentsType'
 import {
   getExperiments,
   deleteExperimentByUid,
   deleteExperimentByList,
+  fetchExperiment,
 } from './ExperimentsActions'
-import { convertToExperimentListType } from './ExperimentsUtils'
+import {
+  convertToExperimentListType,
+  convertToExperimentType,
+} from './ExperimentsUtils'
 import {
   pollRunResult,
   run,
@@ -14,17 +18,28 @@ import {
 
 export const initialState: Experiments = {
   status: 'uninitialized',
+  loading: true,
 }
 
 export const experimentsSlice = createSlice({
   name: EXPERIMENTS_SLICE_NAME,
   initialState: initialState as Experiments,
-  reducers: {},
+  reducers: {
+    setLoadingExpriment: (
+      state,
+      action: PayloadAction<{
+        loading: boolean
+      }>,
+    ) => {
+      state.loading = action.payload.loading
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getExperiments.pending, () => {
         return {
           status: 'pending',
+          loading: true,
         }
       })
       .addCase(getExperiments.fulfilled, (state, action) => {
@@ -32,12 +47,14 @@ export const experimentsSlice = createSlice({
         return {
           status: 'fulfilled',
           experimentList,
+          loading: false,
         }
       })
       .addCase(getExperiments.rejected, (state, action) => {
         return {
           status: 'error',
           message: action.error.message,
+          loading: false,
         }
       })
       .addCase(deleteExperimentByUid.fulfilled, (state, action) => {
@@ -63,12 +80,24 @@ export const experimentsSlice = createSlice({
           })
         }
       })
+      .addCase(fetchExperiment.fulfilled, (state, action) => {
+        if (state.status === 'fulfilled') {
+          state.experimentList[action.payload.data.unique_id] =
+            convertToExperimentType(action.payload.data)
+        }
+        state.loading = false
+      })
+      .addCase(fetchExperiment.rejected, (state, action) => {
+        state.loading = false
+      })
       .addMatcher(isAnyOf(run.fulfilled, runByCurrentUid.fulfilled), () => {
         return {
           status: 'uninitialized',
+          loading: false,
         }
       })
   },
 })
+export const { setLoadingExpriment } = experimentsSlice.actions
 
 export default experimentsSlice.reducer

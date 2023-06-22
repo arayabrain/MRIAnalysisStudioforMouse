@@ -10,21 +10,25 @@ from optinist.api.workflow.workflow import (
     Node,
     NodeData,
     NodePosition,
-    Style
+    OutputPath,
+    Style,
+    SubjectAnalysisInfo
 )
 
 
 class ExptConfigReader:
-
     @classmethod
     def read(cls, filepath) -> ExptConfig:
         with open(filepath, "r") as f:
             config = yaml.safe_load(f)
 
         return ExptConfig(
+            project_id=config["project_id"],
             unique_id=config["unique_id"],
             name=config["name"],
-            timestamp=config["timestamp"],
+            started_at=config.get("started_at", config.get("timestamp")),
+            finished_at=config.get("finished_at"),
+            success=config.get("success", "running"),
             hasNWB=config["hasNWB"],
             function=cls.read_function(config["function"]),
             nodeDict=cls.read_nodeDict(config["nodeDict"]),
@@ -37,8 +41,13 @@ class ExptConfigReader:
             key: ExptFunction(
                 unique_id=value["unique_id"],
                 name=value["name"],
-                success=value["success"],
+                success=value.get("success", "running"),
                 hasNWB=value["hasNWB"],
+                started_at=value.get("started_at"),
+                finished_at=value.get("finished_at"),
+                message=value.get("message"),
+                outputPaths=cls.read_output_paths(value.get("outputPaths")),
+                subjects=cls.read_subjects(value.get("subjects"))
             )
             for key, value in config.items()
         }
@@ -71,3 +80,29 @@ class ExptConfigReader:
             )
             for key, value in config.items()
         }
+
+    @classmethod
+    def read_output_paths(cls, config) -> Dict[str, OutputPath]:
+        if config:
+            return {
+                key: OutputPath(
+                    path=value["path"], type=value["type"], max_index=value["max_index"]
+                )
+                for key, value in config.items()
+            }
+        else:
+            return None
+
+    @classmethod
+    def read_subjects(cls, config) -> Dict[str, Dict[str, SubjectAnalysisInfo]]:
+        if config:
+            return {
+                key: SubjectAnalysisInfo(
+                    success=value["success"],
+                    output_path=value["output_path"],
+                    message=value["message"],
+                )
+                for key, value in config.items()
+            }
+        else:
+            return None

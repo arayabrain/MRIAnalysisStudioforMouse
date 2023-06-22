@@ -13,7 +13,7 @@ export const ImportButton = React.memo(() => {
   const { enqueueSnackbar } = useSnackbar()
 
   const onClick = () => {
-    dispatch(importExperimentByUid(uid))
+    dispatch(importExperimentByUid({ uid, urls: [] }))
       .unwrap()
       .then(() =>
         enqueueSnackbar('Successfully imported.', { variant: 'success' }),

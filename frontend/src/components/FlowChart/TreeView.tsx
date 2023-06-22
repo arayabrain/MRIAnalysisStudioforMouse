@@ -19,17 +19,10 @@ import {
 } from 'store/slice/AlgorithmList/AlgorithmListType'
 import { isAlgoChild } from 'store/slice/AlgorithmList/AlgorithmListUtils'
 import { getAlgoList } from 'store/slice/AlgorithmList/AlgorithmListActions'
-import { FILE_TYPE, FILE_TYPE_SET } from 'store/slice/InputNode/InputNodeType'
-import {
-  NODE_TYPE,
-  NODE_TYPE_SET,
-} from 'store/slice/FlowElement/FlowElementType'
-import {
-  addAlgorithmNode,
-  addInputNode,
-} from 'store/slice/FlowElement/FlowElementActions'
+import { NODE_TYPE_SET } from 'store/slice/FlowElement/FlowElementType'
+import { addAlgorithmNode } from 'store/slice/FlowElement/FlowElementActions'
 import { getNanoId } from 'utils/nanoid/NanoIdUtils'
-import { REACT_FLOW_NODE_TYPE, REACT_FLOW_NODE_TYPE_KEY } from 'const/flowchart'
+import { REACT_FLOW_NODE_TYPE_KEY } from 'const/flowchart'
 import {
   DND_ITEM_TYPE_SET,
   TreeItemCollectedProps,
@@ -81,33 +74,6 @@ export const AlgorithmTreeView = React.memo(() => {
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
     >
-      <TreeItem nodeId="Data" label="Data">
-        <InputNodeComponent
-          fileName={'image'}
-          nodeName={'imageData'}
-          fileType={FILE_TYPE_SET.IMAGE}
-        />
-        <InputNodeComponent
-          fileName={'csv'}
-          nodeName={'csvData'}
-          fileType={FILE_TYPE_SET.CSV}
-        />
-        <InputNodeComponent
-          fileName={'hdf5'}
-          nodeName={'hdf5Data'}
-          fileType={FILE_TYPE_SET.HDF5}
-        />
-        <InputNodeComponent
-          fileName={'fluo'}
-          nodeName={'fluoData'}
-          fileType={FILE_TYPE_SET.FLUO}
-        />
-        <InputNodeComponent
-          fileName={'behavior'}
-          nodeName={'behaviorData'}
-          fileType={FILE_TYPE_SET.BEHAVIOR}
-        />
-      </TreeItem>
       <TreeItem nodeId="Algorithm" label="Algorithm">
         {Object.entries(algoList).map(([name, node], i) => (
           <AlgoNodeComponentRecursive
@@ -119,80 +85,6 @@ export const AlgorithmTreeView = React.memo(() => {
         ))}
       </TreeItem>
     </TreeView>
-  )
-})
-
-const InputNodeComponent = React.memo<{
-  fileName: string
-  nodeName: string
-  fileType: FILE_TYPE
-}>(({ fileName, nodeName, fileType }) => {
-  const dispatch = useDispatch()
-
-  const onAddDataNode = React.useCallback(
-    (
-      nodeType: NODE_TYPE,
-      nodeName: string,
-      fileType: FILE_TYPE,
-      position?: { x: number; y: number },
-    ) => {
-      let reactFlowNodeType: REACT_FLOW_NODE_TYPE | '' = ''
-      switch (fileType) {
-        case FILE_TYPE_SET.CSV:
-          reactFlowNodeType = REACT_FLOW_NODE_TYPE_KEY.CsvFileNode
-          break
-        case FILE_TYPE_SET.IMAGE:
-          reactFlowNodeType = REACT_FLOW_NODE_TYPE_KEY.ImageFileNode
-          fileType = FILE_TYPE_SET.IMAGE
-          break
-        case FILE_TYPE_SET.HDF5:
-          reactFlowNodeType = REACT_FLOW_NODE_TYPE_KEY.HDF5FileNode
-          fileType = FILE_TYPE_SET.HDF5
-          break
-        case FILE_TYPE_SET.FLUO:
-          reactFlowNodeType = REACT_FLOW_NODE_TYPE_KEY.FluoFileNode
-          fileType = FILE_TYPE_SET.FLUO
-          break
-        case FILE_TYPE_SET.BEHAVIOR:
-          reactFlowNodeType = REACT_FLOW_NODE_TYPE_KEY.BehaviorFileNode
-          fileType = FILE_TYPE_SET.BEHAVIOR
-          break
-      }
-      const newNode = {
-        id: `input_${getNanoId()}`,
-        type: reactFlowNodeType,
-        data: { label: nodeName, type: nodeType },
-        position,
-      }
-      dispatch(addInputNode({ node: newNode, fileType }))
-    },
-    [dispatch],
-  )
-
-  const { isDragging, dragRef } = useLeafItemDrag(
-    React.useCallback(
-      (position) => {
-        onAddDataNode(NODE_TYPE_SET.INPUT, nodeName, fileType, position)
-      },
-      [onAddDataNode, nodeName, fileType],
-    ),
-  )
-
-  return (
-    <LeafItem
-      ref={dragRef}
-      style={{
-        opacity: isDragging ? 0.6 : 1,
-      }}
-      onFocusCapture={(e) => e.stopPropagation()}
-      nodeId={fileName}
-      label={
-        <AddButton
-          name={fileName}
-          onClick={() => onAddDataNode(NODE_TYPE_SET.INPUT, nodeName, fileType)}
-        />
-      }
-    />
   )
 })
 

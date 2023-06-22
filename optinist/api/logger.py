@@ -6,16 +6,20 @@ from optinist.api.dir_path import DIRPATH
 from optinist.api.utils.filepath_creater import create_directory, join_filepath
 
 
-def get_logger(unique_id: str) -> logging.Logger:
+def get_logger(project_id: str, unique_id: str) -> logging.Logger:
     output_dirpath = join_filepath([
         DIRPATH.OUTPUT_DIR,
+        project_id,
         unique_id,
     ])
     create_directory(output_dirpath)
 
     filepath = f"{output_dirpath}/error.log"
     if os.path.exists(filepath):
-        os.remove(filepath)
+        try:
+            os.remove(filepath)
+        except Exception as e:
+            print("[Exception][Logger]", e)
 
     logger = logging.getLogger(unique_id)
 
@@ -30,9 +34,9 @@ def get_logger(unique_id: str) -> logging.Logger:
 
 
 class Logger:
-    def __init__(self, unique_id):
+    def __init__(self, project_id, unique_id):
         self.unique_id = unique_id
-        self.logger: logging.Logger = get_logger(unique_id)
+        self.logger: logging.Logger = get_logger(project_id, unique_id)
 
     def smk_logger(self, msg: Dict[str, str] = None):
         """

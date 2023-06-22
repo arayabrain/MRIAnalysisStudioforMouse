@@ -1,13 +1,11 @@
 import os
-import shutil
 from glob import glob
 from typing import List
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter
 
 from optinist.api.dir_path import DIRPATH
-from optinist.api.utils.filepath_creater import create_directory, join_filepath
-from optinist.routers.const import ACCEPT_CSV_EXT, ACCEPT_HDF5_EXT, ACCEPT_TIFF_EXT
-from optinist.routers.model import FILETYPE, TreeNode
+from optinist.api.utils.filepath_creater import join_filepath
+from optinist.routers.model import TreeNode
 
 router = APIRouter()
 
@@ -17,7 +15,7 @@ class DirTreeGetter:
     @classmethod
     def get_tree(cls, file_types: List[str], dirname: str = None) -> List[TreeNode]:
         nodes: List[TreeNode] = []
-        
+
         if dirname is None:
             absolute_dirpath = DIRPATH.INPUT_DIR
         else:
@@ -59,25 +57,3 @@ class DirTreeGetter:
             ))
 
         return files_list
-
-
-@router.get("/files")
-async def get_files(file_type: str = None):
-    if file_type == FILETYPE.IMAGE:
-        return DirTreeGetter.get_tree(ACCEPT_TIFF_EXT)
-    elif file_type == FILETYPE.CSV:
-        return DirTreeGetter.get_tree(ACCEPT_CSV_EXT)
-    elif file_type == FILETYPE.HDF5:
-        return DirTreeGetter.get_tree(ACCEPT_HDF5_EXT)
-
-
-@router.post("/files/upload/{filename}")
-async def create_file(filename: str, file: UploadFile = File(...)):
-    create_directory(DIRPATH.INPUT_DIR)
-
-    filepath = join_filepath([DIRPATH.INPUT_DIR, filename])
-
-    with open(filepath, "wb") as f:
-        shutil.copyfileobj(file.file, f)
-
-    return { "file_path": filename }

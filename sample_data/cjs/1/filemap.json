@@ -1,0 +1,31 @@
+[
+	{
+		"folder_name": "between_factor_A",
+		"images": [
+			{ "id": "id_a", "path": "proj_root/mouse1/sub-mouse1_ses-20230501123456_rec-1_run-1_T2W.nii" },
+			{ "id": "id_b", "path": "proj_root/mouse2/sub-mouse2_ses-20230502123456_rec-1_run-1_T2W.nii" }],
+		"sub_folders": [{
+			"folder_name": "within_factor_AA",
+			"images": [
+				{ "id": "id_c", "path": "proj_root/mouse3/sub-mouse3_ses-202305031123456_rec-1_run-1_T2W.nii" },
+				{ "id": "id_d", "path": "proj_root/mouse4/sub-mouse4_ses-20230504123456_rec-1_run-1_T2W.nii" }]}, 
+			{
+			"folder_name": "within_factor_BB",
+			"images": [
+				{ "id": "id_e", "path": "proj_root/mouse5/sub-mouse5_ses-20230505123456_rec-1_run-1_T2W.nii" },
+				{ "id": "id_f", "path": "proj_root/mouse6/sub-mouse6_ses-20230506123456_rec-1_run-1_T2W.nii" }]
+			}]
+	}, 
+	{
+		"folder_name": "between_factor_B",
+		"images": [
+			{ "id": "id_g", "path": "proj_root/mouse7/sub-mouse7_ses-20230507123456_rec-1_run-1_T2W.nii" },
+			{ "id": "id_h", "path": "proj_root/mouse8/sub-mouse8_ses-20230508123456_rec-1_run-1_T2W.nii" }],
+		"sub_folders": [{
+			"folder_name": "within_factor_CC",
+			"images": [
+				{ "id": "id_i", "path": "proj_root/mouse9/sub-mouse9_ses-20230509123456_rec-1_run-1_T2W.nii" },
+				{ "id": "id_j", "path": "proj_root/mouse10/sub-mouse10_ses-20230510123456_rec-1_run-1_T2W.nii" }]
+			}]
+	}
+]

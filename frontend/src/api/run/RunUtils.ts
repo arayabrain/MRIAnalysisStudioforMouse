@@ -1,4 +1,4 @@
-import type { Node } from 'react-flow-renderer'
+import type { FlowElement, Node } from 'react-flow-renderer'
 import {
   isInputNodeData,
   isAlgorithmNodeData,
@@ -8,15 +8,16 @@ import type {
   InputNodePostData,
   AlgorithmNodePostData,
 } from './Run'
+import { NodeData } from 'store/slice/FlowElement/FlowElementType'
 
 export function isInputNodePostData(
   node: Node<NodePostDataType>,
 ): node is Node<InputNodePostData> {
-  return isInputNodeData(node)
+  return isInputNodeData(node as FlowElement<NodeData>)
 }
 
 export function isAlgorithmNodePostData(
   node: Node<NodePostDataType>,
 ): node is Node<AlgorithmNodePostData> {
-  return isAlgorithmNodeData(node)
+  return isAlgorithmNodeData(node as FlowElement<NodeData>)
 }

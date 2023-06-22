@@ -8,6 +8,27 @@ export const FILE_TYPE_SET = {
   BEHAVIOR: 'behavior',
 } as const
 
+export type Params = {
+  image_id: number | string
+  x_pos: number
+  y_pos: number
+  z_pos: number
+  x_rotate: number
+  y_rotate: number
+  z_rotate: number
+  x_resize: number
+  y_resize: number
+  z_resize: number
+}
+
+export type AlignmentData = {
+  alignments: {
+    path: string
+    type: string
+    value: Params[]
+  }
+}
+
 export type FILE_TYPE = typeof FILE_TYPE_SET[keyof typeof FILE_TYPE_SET]
 
 export type InputNode = {
@@ -36,7 +57,8 @@ export interface CsvInputNode
   selectedFilePath?: string
 }
 
-export interface ImageInputNode extends InputNodeBaseType<'image', {}> {
+export interface ImageInputNode
+  extends InputNodeBaseType<'image', AlignmentData> {
   selectedFilePath?: string[]
 }
 

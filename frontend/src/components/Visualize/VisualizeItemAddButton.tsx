@@ -40,4 +40,6 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 const StyledButton = styled(Button)({
   width: '100%',
   height: '100%',
+  backgroundColor: '#283237 !important',
+  color: '#ffffff'
 })

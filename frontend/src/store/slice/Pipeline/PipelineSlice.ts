@@ -1,5 +1,8 @@
 import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit'
-import { importExperimentByUid } from '../Experiments/ExperimentsActions'
+import {
+  fetchExperiment,
+  importExperimentByUid,
+} from '../Experiments/ExperimentsActions'
 import { pollRunResult, run, runByCurrentUid } from './PipelineActions'
 import {
   Pipeline,
@@ -14,6 +17,7 @@ import {
   convertToRunResult,
   isNodeResultPending,
 } from './PipelineUtils'
+import { convertFunctionsToRunResultDTO } from '../Experiments/ExperimentsUtils'
 
 const initialState: Pipeline = {
   run: {
@@ -28,14 +32,17 @@ export const pipelineSlice = createSlice({
   reducers: {
     cancelPipeline(state) {
       state.run.status = RUN_STATUS.CANCELED
+      state.runAlreadyDisabled = false
     },
     setRunBtnOption: (
       state,
       action: PayloadAction<{
         runBtnOption: RUN_BTN_TYPE
+        runAlreadyDisabled?: boolean
       }>,
     ) => {
       state.runBtn = action.payload.runBtnOption
+      state.runAlreadyDisabled = action.payload.runAlreadyDisabled ?? false
     },
   },
   extraReducers: (builder) => {
@@ -52,21 +59,62 @@ export const pipelineSlice = createSlice({
           if (runResultPendingList.length === 0) {
             // 終了
             state.run.status = RUN_STATUS.FINISHED
+            state.runBtn = RUN_BTN_OPTIONS.RUN_ALREADY
+            state.runAlreadyDisabled = false
           }
         }
       })
       .addCase(pollRunResult.rejected, (state, action) => {
         state.run.status = RUN_STATUS.ABORTED
+        state.runBtn = RUN_BTN_OPTIONS.RUN_ALREADY
+        state.runAlreadyDisabled = false
       })
       .addCase(importExperimentByUid.fulfilled, (state, action) => {
-        state.currentPipeline = {
-          uid: action.meta.arg,
+        if (action.meta.arg.uid === 'default') {
+          state.runBtn = RUN_BTN_OPTIONS.RUN_NEW
+          state.runAlreadyDisabled = true
+        } else {
+          state.currentPipeline = {
+            uid: action.meta.arg.uid,
+          }
+          state.runBtn = RUN_BTN_OPTIONS.RUN_ALREADY
         }
-        state.runBtn = RUN_BTN_OPTIONS.RUN_ALREADY
         state.run = {
           status: RUN_STATUS.START_UNINITIALIZED,
         }
       })
+      .addCase(fetchExperiment.fulfilled, (state, action) => {
+        state.currentPipeline = {
+          uid: action.payload.data.unique_id,
+        }
+        state.runBtn = RUN_BTN_OPTIONS.RUN_ALREADY
+        state.runAlreadyDisabled = false
+        state.run = {
+          uid: action.payload.data.unique_id,
+          status: RUN_STATUS.START_SUCCESS,
+          runResult: {
+            ...convertToRunResult(
+              convertFunctionsToRunResultDTO(action.payload.data.function),
+            ),
+          },
+          runPostData: {
+            name: action.payload.data.name,
+            nodeDict: action.payload.data.nodeDict,
+            edgeDict: action.payload.data.edgeDict,
+            snakemakeParam: {},
+            nwbParam: {},
+            forceRunList: [],
+          },
+        }
+
+        const runResultPendingList = Object.values(state.run.runResult).filter(
+          isNodeResultPending,
+        )
+        if (runResultPendingList.length === 0) {
+          state.run.status = RUN_STATUS.FINISHED
+        }
+      })
+      .addCase(fetchExperiment.rejected, (_state, _action) => initialState)
       .addMatcher(
         isAnyOf(run.pending, runByCurrentUid.pending),
         (state, action) => {

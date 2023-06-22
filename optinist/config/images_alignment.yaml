@@ -1,0 +1,12 @@
+alignments:
+  # Repeat the following for the number of images.
+  - image_id: 0
+    x_pos: 0
+    y_pos: 0
+    z_pos: 0
+    x_rotate: 0.0
+    y_rotate: 0.0
+    z_rotate: 0.0
+    x_resize: 0.0
+    y_resize: 0.0
+    z_resize: 0.0

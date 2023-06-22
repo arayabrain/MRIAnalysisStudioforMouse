@@ -1,114 +1,246 @@
-import React from 'react'
-import AppBar from '@mui/material/AppBar'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import Typography from '@mui/material/Typography'
-import Toolbar from '@mui/material/Toolbar'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
+import { Box, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import GitHubIcon from '@mui/icons-material/GitHub'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
+import { FC, useEffect, useState } from 'react'
+import Header from './Header'
+import { KeyboardBackspace } from '@mui/icons-material'
+import HomeIcon from '@mui/icons-material/Home'
+import SourceIcon from '@mui/icons-material/Source'
+import StorageIcon from '@mui/icons-material/Storage'
+import GroupIcon from '@mui/icons-material/Group'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { User, UserContext, useUser } from 'providers'
+import {
+  getToken,
+  isAdmin,
+  removeExToken,
+  removeToken,
+} from 'utils/auth'
+import { getMe } from 'api/auth'
 
-import { useRunPipeline } from 'store/slice/Pipeline/PipelineHook'
-import FlowChart from './FlowChart/FlowChart'
-import Visualize from './Visualize/Visualize'
-import Experiment from './Experiment/Experiment'
-import studioLogo from './studio.png'
+export const drawerWidth = 240
 
-const Layout: React.FC = () => {
-  const [value, setValue] = React.useState(0)
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue)
+const ignorePaths = ['/login', '/account-delete', '/reset-password']
+
+const Layout: FC = ({ children }) => {
+  const [user, setUser] = useState<User | undefined>()
+  const location = useLocation()
+  const [width, setWidth] = useState(drawerWidth)
+  const navigate = useNavigate()
+  const onResize = () => {
+    setWidth(width === drawerWidth ? 54 : drawerWidth)
   }
 
-  const runPipeline = useRunPipeline() // タブ切り替えによって結果取得処理が止まってしまうのを回避するため、タブの親レイヤーで呼び出している
+  useEffect(() => {
+    checkkAuth()
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    checkkAuth()
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname])
+
+  const checkkAuth = async () => {
+    if (user) return
+    const token = getToken()
+    const isPageLogin = ['/login', '/reset-password'].includes(
+      window.location.pathname,
+    )
+    try {
+      if (token) {
+        const data = await getMe()
+        setUser(data)
+        if (isPageLogin) navigate('/')
+      } else if (!isPageLogin) throw new Error('fail auth')
+    } catch {
+      removeToken()
+      removeExToken()
+      navigate('/login')
+    }
+  }
 
   return (
-    <RootDiv>
-      <StyledAppBar position="fixed" color="inherit">
-        <Toolbar variant="dense">
-          <img src={studioLogo} alt="studio" width={75} height={50} />
-          <Tabs
-            sx={{ width: '100%' }}
-            value={value}
-            onChange={handleChange}
-            centered
-            textColor="primary"
+    <UserContext.Provider value={{ user, setUser }}>
+      <LayoutWrapper>
+        {ignorePaths.includes(location.pathname) ? null : <Header />}
+        <ContentBodyWrapper>
+          {ignorePaths.includes(location.pathname) ? null : (
+            <MenuLeft onResize={onResize} width={width} />
+          )}
+          <ChildrenWrapper
+            style={{
+              width: `calc(100% - ${
+                ignorePaths.includes(location.pathname) ? 0 : width + 10
+              }px)`,
+              height: '100%',
+              overflow: 'auto',
+            }}
           >
-            <Tab label="Workflow" {...a11yProps(0)} />
-            <Tab label="Visualize" {...a11yProps(1)} />
-            <Tab label="Record" {...a11yProps(2)} />
-          </Tabs>
-          <Tooltip title="GitHub repository">
-            <IconButton
-              sx={{ mr: 1 }}
-              href="https://github.com/oist/studio"
-              target="_blank"
-            >
-              <GitHubIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Documentation">
-            <IconButton
-              href="https://studio.readthedocs.io/en/latest/"
-              target="_blank"
-            >
-              <MenuBookIcon />
-            </IconButton>
-          </Tooltip>
-        </Toolbar>
-      </StyledAppBar>
-      <TabPanel value={value} index={0}>
-        <FlowChart {...runPipeline} />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Visualize />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <Experiment />
-      </TabPanel>
-    </RootDiv>
+            {children}
+          </ChildrenWrapper>
+        </ContentBodyWrapper>
+      </LayoutWrapper>
+    </UserContext.Provider>
   )
 }
 
-const RootDiv = styled('div')(({ theme }) => ({
-  flexGrow: 1,
-  backgroundColor: theme.palette.background.paper,
-}))
-
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: '#E1DEDB',
-}))
-
-interface TabPanelProps {
-  children?: React.ReactNode
-  index: any
-  value: any
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
-
+const MenuLeft: FC<{ onResize: () => void; width: number }> = ({
+  onResize,
+  width,
+}) => {
+  const { user } = useUser()
+  const { pathname } = useLocation()
+  const isClose = width !== drawerWidth
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Typography>{children}</Typography>}
-    </div>
+    <MenuLeftWrapper style={{ width, minWidth: width }}>
+      <BoxBack>
+        <ButtonBack
+          onClick={onResize}
+          style={{ transform: `rotate(${width === drawerWidth ? 0 : 180}deg)` }}
+        >
+          <BoxDivider />
+          <KeyboardBackspaceIcon />
+        </ButtonBack>
+      </BoxBack>
+      <MenuList>
+        <LinkWrapper to="/">
+          <MenuItem isClose={isClose} active={pathname === '/'}>
+            <HomeIcon />
+            <TypographyMenu style={{ opacity: Number(width === drawerWidth) }}>
+              Dashboard
+            </TypographyMenu>
+          </MenuItem>
+        </LinkWrapper>
+        <LinkWrapper to="/database">
+          <MenuItem isClose={isClose} active={pathname === '/database'}>
+            <StorageIcon />
+            <TypographyMenu style={{ opacity: Number(width === drawerWidth) }}>
+              Database
+            </TypographyMenu>
+          </MenuItem>
+        </LinkWrapper>
+        <LinkWrapper to="/projects">
+          <MenuItem isClose={isClose} active={pathname.includes('/projects')}>
+            <SourceIcon />
+            <TypographyMenu style={{ opacity: Number(width === drawerWidth) }}>
+              Projects
+            </TypographyMenu>
+          </MenuItem>
+        </LinkWrapper>
+        {isAdmin(user?.role) ? (
+          <LinkWrapper to="/account-manager">
+            <MenuItem
+              isClose={isClose}
+              active={pathname === '/account-manager'}
+            >
+              <GroupIcon />
+              <TypographyMenu
+                style={{ opacity: Number(width === drawerWidth) }}
+              >
+                Account Manager
+              </TypographyMenu>
+            </MenuItem>
+          </LinkWrapper>
+        ) : null}
+      </MenuList>
+    </MenuLeftWrapper>
   )
 }
 
-function a11yProps(index: any) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  }
-}
+const LinkWrapper = styled(Link)(() => ({
+  textDecoration: 'none',
+}))
+
+const LayoutWrapper = styled(Box)({
+  height: '100%',
+  width: '100%',
+})
+
+const ContentBodyWrapper = styled(Box)(() => ({
+  backgroundColor: '#ffffff',
+  display: 'flex',
+  paddingTop: 48,
+  height: 'calc(100% - 48px)',
+  paddingRight: 10,
+  overflow: 'hidden',
+}))
+
+const ChildrenWrapper = styled(Box)(() => ({
+  height: 'calc(100% - 10px)',
+  display: 'flex',
+  paddingTop: 10,
+  paddingLeft: 10,
+}))
+
+const MenuLeftWrapper = styled(Box)({
+  height: '100%',
+  backgroundColor: '#283237',
+  overflow: 'auto',
+  transition: 'all 0.3s',
+})
+
+const BoxBack = styled(Box)({
+  width: '100%',
+  height: 54,
+  display: 'flex',
+  justifyContent: 'flex-end',
+})
+
+const ButtonBack = styled(Box)({
+  height: 54,
+  width: 54,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+})
+
+const BoxDivider = styled(Box)({
+  height: 15,
+  width: 1,
+  backgroundColor: '#ffffff',
+  marginRight: -2,
+})
+
+const KeyboardBackspaceIcon = styled(KeyboardBackspace)({
+  color: '#ffffff',
+  fontSize: 20,
+})
+
+const MenuList = styled('ul')({
+  margin: 0,
+  padding: 0,
+})
+
+const MenuItem = styled('li', {
+  shouldForwardProp: (props) => props !== 'isClose' && props !== 'active',
+})<{ isClose: boolean; active: boolean }>(({ isClose, active }) => ({
+  padding: '0 15px',
+  color: '#ffffff',
+  listStyle: 'none',
+  height: 38,
+  minHeight: 38,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  width: 'calc(100% - 30px)',
+  minWidth: 'max-content',
+  transition: 'all 0.3s',
+  cursor: 'pointer',
+  backgroundColor: active ? 'rgba(255,255,255,0.4) !important' : 'transparent',
+  '&:hover': {
+    transform: isClose
+      ? 'scale(1.05) translateX(2px)'
+      : 'scale(1.05) translateX(10px)',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+}))
+
+const TypographyMenu = styled(Typography)({
+  lineHeight: '20px',
+  marginTop: 4,
+  fontWeight: 500,
+  transition: 'opacity 0.3s',
+})
 
 export default Layout

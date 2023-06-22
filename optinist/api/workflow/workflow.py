@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Union, Optional
+
 from pydantic import BaseModel
 
 from optinist.api.snakemake.smk import ForceRun
@@ -7,6 +8,7 @@ from optinist.api.snakemake.smk import ForceRun
 
 @dataclass
 class NodeType:
+    ALIGNMENT: str = "AlignmentNode"
     IMAGE: str = "ImageFileNode"
     CSV: str = "CsvFileNode"
     FLUO: str = "FluoFileNode"
@@ -48,7 +50,7 @@ class Message:
 class NodeData:
     label: str
     param: dict
-    path: list or str
+    path: Union[str, List]
     type: str
     fileType: str = None
     hdf5Path: str = None
@@ -97,3 +99,38 @@ class RunItem(BaseModel):
     snakemakeParam: dict = {}
     nwbParam: dict = {}
     forceRunList: List[ForceRun]
+
+
+@dataclass
+class SubjectAnalysisInfo:
+    success: List[str]
+    output_path: List[str]
+    message: List[str]
+
+
+@dataclass
+class NodeInfo:
+    unique_id: str
+    name: str
+    success: str
+    message: str
+    outputs: List[str]
+
+
+@dataclass
+class SubjectInfo:
+    subject_id: str
+    name: str
+    function: Dict[str, NodeInfo]
+    nodeDict: Dict[str, Node]
+    edgeDict: Dict[str, Edge]
+
+
+@dataclass
+class ExptInfo:
+    started_at: str
+    finished_at: Optional[str]
+    unique_id: str
+    name: str
+    status: Optional[str]
+    results: List[SubjectInfo]

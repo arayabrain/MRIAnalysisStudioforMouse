@@ -10,7 +10,7 @@ export const INITIAL_ALGO_STYLE: React.CSSProperties = {
 
 export const INITIAL_DATA_STYLE: React.CSSProperties = {
   border: '1px solid #777',
-  height: 120,
+  height: 130,
 } as const
 
 export const REACT_FLOW_NODE_TYPE_KEY = {

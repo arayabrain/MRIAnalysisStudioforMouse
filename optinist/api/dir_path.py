@@ -24,4 +24,5 @@ class DIRPATH:
 
     SNAKEMAKE_FILEPATH = f"{ROOT_DIR}/Snakefile"
     EXPERIMENT_YML = "experiment.yaml"
+    DEFAULT_EXPERIMENT_YML = "default_experiment.yaml"
     SNAKEMAKE_CONFIG_YML = "config.yaml"
