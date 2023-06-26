@@ -62,8 +62,8 @@ const TableImple = React.memo(({data}: ExperimentTableProps) => {
                 <ExperimentStatusIcon status={dataView?.status as EXPERIMENTS_STATUS}/>
               </Box>
               <Box>
-                <Typography>Start time: {dayjs(dataView?.started_at).format('YYYY-MM-DD HH:mm')}</Typography>
-                <Typography>Finish time: {dayjs(dataView?.finished_at).format('YYYY-MM-DD HH:mm')}</Typography>
+                <Typography><span style={{display:'inline-block', width:'100px'}}>Start time:</span> {dayjs(dataView?.started_at).format('YYYY-MM-DD HH:mm')}</Typography>
+                <Typography><span style={{display:'inline-block', width:'100px'}}>Finish time:</span> {dayjs(dataView?.finished_at).format('YYYY-MM-DD HH:mm')}</Typography>
               </Box>
             </Box>
             <Paper
