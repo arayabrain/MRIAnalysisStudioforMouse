@@ -32,7 +32,10 @@ services:
       - ./frontend/:/app/frontend/
     ports:
       - "3000:3000"
-    command: npm run start
+    command: yarn start
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - BROWSER=none
     env_file:
       - ./frontend/.env.development
 
