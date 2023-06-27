@@ -230,6 +230,15 @@ const ProjectFormComponent = () => {
 
   const errorProjectEmpty = useMemo(() => !projectName, [projectName])
 
+  const queryFilter: {[key: string]: string } = useMemo(() => {
+    return {
+      session_label: searchParams.get('session_label') || '',
+      datatypes_label: searchParams.get('datatypes_label') || '',
+      type: searchParams.get('type') || '',
+      protocol: searchParams.get('protocol') || '',
+    }
+  }, [searchParams])
+
   useEffect(() => {
     setLoading(true)
     if (!idEdit) {
@@ -289,20 +298,14 @@ const ProjectFormComponent = () => {
     const newParams = Object.keys(value)
       .map((key) => value[key] && `${key}=${value[key]}`)
       .join('&')
-    setParams(newParams)
+    idEdit ? setParams(`id=${idEdit}&${newParams}${nodeId ? `&nodeId=${nodeId}` : ''}${routeGoback ? `&back=${routeGoback}` : ''}`) : setParams(newParams)
   }
 
   const getDataTree = async () => {
-    const defaultValue = {
-      session_label: searchParams.get('session_label') || '',
-      datatypes_label: searchParams.get('datatypes_label') || '',
-      type: searchParams.get('type') || '',
-      protocol: searchParams.get('protocol') || '',
-    }
     try {
       const response = await getDataBaseTree()
-      const records = onFilterValue(defaultValue, response, 'tree')
-      setDatabases({ ...databasese, records: records as RecordDatabase[] })
+      const records = onFilterValue(queryFilter, response, 'tree')
+      setDatabases({...databasese, records: records as RecordDatabase[]})
       setInitDatabases(response)
     } catch {}
   }
@@ -739,7 +742,7 @@ const ProjectFormComponent = () => {
   }
 
   const handleClear = () => {
-    setParams('')
+    idEdit ? setParams(`id=${idEdit}${nodeId ? `&nodeId=${nodeId}` : ''}${routeGoback ? `&back=${routeGoback}` : ''}`) : setParams('')
     const data = onSort(
       JSON.parse(JSON.stringify(initDatabases.records)),
       orderBy,
@@ -752,12 +755,7 @@ const ProjectFormComponent = () => {
     <ProjectsWrapper>
       {openFilter && (
         <PopupSearch
-          defaultValue={{
-            session_label: searchParams.get('session_label') || '',
-            datatypes_label: searchParams.get('datatypes_label') || '',
-            type: searchParams.get('type') || '',
-            protocol: searchParams.get('protocol') || '',
-          }}
+          defaultValue={queryFilter}
           onFilter={onFilter}
           onClose={() => setOpenFilter(false)}
         />
@@ -918,10 +916,11 @@ const ProjectFormComponent = () => {
         </DragBox>
         <DropBox>
           <BoxFilter>
-            <Box sx={{ display: 'flex', gap: 5 }}>
-              <Button variant="contained" onClick={handleClear}>
+            <Box sx={{display: 'flex', gap: 5}}>
+              { Object.keys(queryFilter).some((key) => queryFilter[key]) &&
+                <Button variant="contained" onClick={handleClear}>
                 Clear Filter
-              </Button>
+              </Button>}
               <ButtonFilter
                 onClick={() => setOpenFilter(true)}
                 style={{ margin: '0 26px 0 0' }}

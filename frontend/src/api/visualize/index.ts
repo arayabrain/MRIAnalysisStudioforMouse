@@ -8,12 +8,12 @@ type Generate = {
 }
 
 export const saveParams = async (data: object) => {
-  const response = await axios.post(`/image_stat/param`, data)
+  const response = await axios.post(`/user/config/stat_image`, data)
   return response.data
 }
 
 export const loadParams = async () => {
-  const response = await axios.get(`/image_stat/param`)
+  const response = await axios.get(`/user/config/stat_image`)
   return response.data
 }
 

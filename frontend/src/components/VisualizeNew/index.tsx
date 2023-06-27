@@ -13,7 +13,9 @@ import { useCallback, useState } from "react";
 import { downloadGenerate, loadParams, postGenerate, saveParams } from "api/visualize";
 import Loading from "../common/Loading";
 import { useSearchParams} from "react-router-dom";
+import { useNavigate } from 'react-router-dom'
 import { BASE_URL } from "../../const/API";
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 
 type InputType = {
   text: string
@@ -132,6 +134,11 @@ const VisualizeNew = () => {
     },
     threshold: ''
   })
+
+  const navigate = useNavigate()
+  const onClickBack = () => {
+    navigate('/projects')
+  }
 
   const onLoadParams = async () => {
     setIsLoading(true)
@@ -286,6 +293,13 @@ const VisualizeNew = () => {
   }
 
   return (
+    <div>
+      <Button
+        onClick={onClickBack}
+        sx={{width: 'fit-content', textTransform: 'unset', fontSize: '1rem'}}
+      >
+        <ArrowBackIosIcon /> PROJECTS
+      </Button>
       <Container>
           <AlertDialog
             open={open}
@@ -330,8 +344,8 @@ const VisualizeNew = () => {
               flexDirection: 'column',
               gap: 2
             }}>
-              <ParamsButton onClick={handleClickOpen}>Save Params</ParamsButton>
               <ParamsButton onClick={onLoadParams}>Load Params</ParamsButton>
+              <ParamsButton onClick={handleClickOpen}>Save Params</ParamsButton>
             </Box>
           </VisualizeInputWrapper>
           <ButtonWrapper>
@@ -351,6 +365,7 @@ const VisualizeNew = () => {
             <Loading />
           }
       </Container>
+    </div>
   )
 }
 

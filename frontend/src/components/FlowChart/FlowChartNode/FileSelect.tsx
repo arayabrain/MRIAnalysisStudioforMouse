@@ -85,7 +85,7 @@ export const FileSelectImple = React.memo<FileSelectImpleProps>(
             variant="outlined"
             onClick={() =>
               navigate(
-                `/projects/new-project?id=${id}&nodeId=${nodeId}&back=/projects/workflow?tab=0&id=${id}`,
+                `/projects/new-project?id=${id}&nodeId=${nodeId}&back=${encodeURIComponent(`/projects/workflow?tab=0&id=${id}`)}`,
               )
             }
           >

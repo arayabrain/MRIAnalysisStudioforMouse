@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 import { ExperimentStatusIcon } from './ExperimentStatusIcon'
-import { Button } from "@mui/material";
+import {Button, ClickAwayListener, styled, Tooltip, tooltipClasses, TooltipProps} from "@mui/material";
 import { FunctionType } from "./Experiment";
 import { BASE_URL } from "../../const/API";
 import ImageView from "../ImageView";
@@ -64,7 +64,7 @@ const Body = React.memo<{
 })
 
 const TableRowOfFunction = ({ data } : {data: object}) => {
-  const {name, success, unique_id, outputs} = data as FunctionType
+  const {name, success, unique_id, outputs, message} = data as FunctionType
   const [disabled, setDisabled] = useState({ left: true, right: false })
   const [viewer, setViewer] = useState<Viewer>({ open: false, url: '' })
   const [index, setIndex] = useState(0)
@@ -94,8 +94,17 @@ const TableRowOfFunction = ({ data } : {data: object}) => {
 
   const onOpen = () => {
     setViewer({ open: true, url: outputs[index] })
-
   }
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleTooltipClose = () => {
+    setOpen(false);
+  };
+
+  const handleTooltipOpen = () => {
+    setOpen(true);
+  };
 
   return (
     <>
@@ -105,7 +114,26 @@ const TableRowOfFunction = ({ data } : {data: object}) => {
             </TableCell>
             <TableCell>{unique_id}</TableCell>
             <TableCell>
-                <ExperimentStatusIcon status={success} />
+              <ClickAwayListener onClickAway={handleTooltipClose}>
+                <div style={{width: 'fit-content'}}>
+                  <LightTooltip
+                      PopperProps={{
+                        disablePortal: true,
+                      }}
+                      placement="top"
+                      onClose={handleTooltipClose}
+                      open={open}
+                      disableFocusListener
+                      disableHoverListener
+                      disableTouchListener
+                      title={message || ''}
+                  >
+                    <Button onClick={handleTooltipOpen} disabled={!message}>
+                      <ExperimentStatusIcon status={success} />
+                    </Button>
+                  </LightTooltip>
+                </div>
+              </ClickAwayListener>
             </TableCell>
             <TableCell>
                 <Button disabled={success !== 'success'} onClick={() => onOpen()}>
@@ -126,3 +154,14 @@ const TableRowOfFunction = ({ data } : {data: object}) => {
     </>
   )
 }
+
+const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.white,
+    color: 'red',
+    boxShadow: theme.shadows[1],
+    fontSize: 15,
+  },
+}));

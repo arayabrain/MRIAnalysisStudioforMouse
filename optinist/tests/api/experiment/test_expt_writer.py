@@ -1,28 +1,19 @@
-import pytest
 import os
 import shutil
 
+from optinist.api.dir_path import DIRPATH
 from optinist.api.experiment.experiment import ExptConfig, ExptFunction
 from optinist.api.experiment.experiment_writer import ExptConfigWriter
 from optinist.api.workflow.workflow import Edge, Node, NodeData, RunItem
 
-
-node_data = NodeData(
-    label="a",
-    param={},
-    path="",
-    type=""
-)
+node_data = NodeData(label="a", param={}, path="", type="")
 
 nodeDict = {
     "test1": Node(
         id="node_id",
         type="a",
         data=node_data,
-        position={
-            "x": 0,
-            "y": 0
-        },
+        position={"x": 0, "y": 0},
         style={
             "border": None,
             "borderRadius": 0,
@@ -46,8 +37,6 @@ edgeDict = {
     )
 }
 
-dirpath = "/tmp/optinist/output/unique_id"
-
 
 def test_create_config() -> ExptConfig:
     runItem = RunItem(
@@ -60,6 +49,7 @@ def test_create_config() -> ExptConfig:
     )
 
     expt_config = ExptConfigWriter(
+        project_id='test_project',
         unique_id="test_id",
         name=runItem.name,
         nodeDict=runItem.nodeDict,
@@ -70,11 +60,12 @@ def test_create_config() -> ExptConfig:
     assert isinstance(expt_config.function, dict)
     assert len(expt_config.function) == 0
 
-    return expt_config
+    assert expt_config
 
 
 def test_add_run_info():
     expt_config = ExptConfigWriter(
+        project_id='test_project',
         unique_id="",
         name="",
         nodeDict=nodeDict,
@@ -86,6 +77,7 @@ def test_add_run_info():
 
 def test_function_from_nodeDict():
     expt_config = ExptConfigWriter(
+        project_id='test_project',
         unique_id="",
         name="",
         nodeDict=nodeDict,
@@ -97,27 +89,31 @@ def test_function_from_nodeDict():
 
 
 def test_new_write():
-    if os.path.exists(dirpath):
-        shutil.rmtree(dirpath)
+    expt_path = f"{DIRPATH.OUTPUT_DIR}/test_project/unique_id/"
+    if os.path.exists(expt_path):
+        shutil.rmtree(expt_path)
 
     ExptConfigWriter(
+        project_id='test_project',
         unique_id="unique_id",
         name="name",
         nodeDict=nodeDict,
         edgeDict=edgeDict,
     ).write()
 
-    assert os.path.exists(f"{dirpath}/experiment.yaml")
+    assert os.path.exists(f"{expt_path}/experiment.yaml")
 
 
 def test_write_add():
+    expt_path = f"{DIRPATH.OUTPUT_DIR}/test_project/unique_id/"
     ExptConfigWriter(
+        project_id='test_project',
         unique_id="unique_id",
         name="name",
         nodeDict=nodeDict,
         edgeDict=edgeDict,
     ).write()
 
-    assert os.path.exists(f"{dirpath}/experiment.yaml")
+    assert os.path.exists(f"{expt_path}/experiment.yaml")
 
-    os.remove(f"{dirpath}/experiment.yaml")
+    os.remove(f"{expt_path}/experiment.yaml")

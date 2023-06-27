@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, styled, TextField } from '@mui/material'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import DatabaseTableComponent, { Column } from 'components/DatabaseTable'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -15,7 +15,7 @@ import {
 } from 'utils/database'
 import { User, useUser } from 'providers'
 import { isReseacher } from 'utils/auth'
-import { getDataBaseList, getDataBaseTree } from 'api/rawdb'
+import { deleteRawDb, getDataBaseList, getDataBaseTree } from 'api/rawdb'
 import { DATABASE_URL_HOST } from 'const/API'
 import Loading from 'components/common/Loading'
 import { useSearchParams } from 'react-router-dom'
@@ -307,7 +307,7 @@ export const columns = (
             onClick={(event) => {
               event.preventDefault()
               event.stopPropagation()
-              setOpenDelete?.(true)
+              setOpenDelete?.(true, data?.id)
             }}
           >
             <DeleteIcon fontSize="small" sx={{ color: 'red' }} />
@@ -322,7 +322,13 @@ const Database = () => {
   const [openPopup, setOpenPopup] = useState(false)
   const [viewer, setViewer] = useState<Viewer>({ open: false, url: '', id: '' })
   const [databases, setDatabases] = useState<DatabaseData | DatabaseListData>()
-  const [openDelete, setOpenDelete] = useState(false)
+  const [{ openDelete, idDelete }, setOpenDelete] = useState<{
+    openDelete: boolean
+    idDelete: number | string
+  }>({
+    openDelete: false,
+    idDelete: '',
+  })
   const [{ orderBy, type, columnSort }, setOrderByAndTypeAndSort] = useState<{
     orderBy: 'ASC' | 'DESC' | ''
     type: 'tree' | 'list'
@@ -340,13 +346,16 @@ const Database = () => {
     setViewer({ open: false, url: '', id: '' })
   }
 
-  const fetchData = useCallback(async () => {
-    const defaultValue = {
+  const queryFilter: {[key: string]: string } = useMemo(() => {
+    return {
       session_label: searchParams.get('session_label') || '',
       datatypes_label: searchParams.get('datatypes_label') || '',
       type: searchParams.get('type') || '',
       protocol: searchParams.get('protocol') || '',
     }
+  }, [searchParams])
+
+  const fetchData = useCallback(async () => {
     setIsLoading(true)
     let data
     try {
@@ -355,7 +364,7 @@ const Database = () => {
         api = getDataBaseTree
       }
       data = await api()
-      const records = onFilterValue(defaultValue, data, type)
+      const records = onFilterValue(queryFilter, data, type)
       setDatabases({ ...data, records })
       setInitDatabases(data)
     } finally {
@@ -379,22 +388,23 @@ const Database = () => {
   }
 
   const handleCloseDelete = () => {
-    setOpenDelete(false)
+    setOpenDelete({ openDelete: false, idDelete: '' })
   }
 
-  const onDelete = () => {
-    setOpenDelete(false)
+  const onDelete = async () => {
+    handleCloseDelete()
+    setIsLoading(true)
+    try {
+      await deleteRawDb(idDelete)
+      fetchData()
+    } catch {
+      setIsLoading(false)
+    }
   }
 
   const handleSort = (orderKey: string, orderByValue: 'DESC' | 'ASC' | '') => {
     if (!initDatabases) return
-    const filterValue = {
-      session_label: searchParams.get('session_label') || '',
-      datatypes_label: searchParams.get('datatypes_label') || '',
-      type: searchParams.get('type') || '',
-      protocol: searchParams.get('protocol') || '',
-    }
-    const records = onFilterValue(filterValue, initDatabases, type)
+    const records = onFilterValue(queryFilter, initDatabases, type)
     const data = onSort(
       JSON.parse(JSON.stringify(records)),
       orderByValue,
@@ -453,6 +463,10 @@ const Database = () => {
     setDatabases({ ...initDatabases, records: data as RecordDatabase[] })
   }
 
+  const onDeleteImage = (flag: boolean, idRemove: string | number) => {
+    setOpenDelete({ openDelete: flag, idDelete: idRemove })
+  }
+
   return (
     <DatabaseWrapper>
       <ModalDeleteAccount
@@ -465,9 +479,12 @@ const Database = () => {
       <ProjectsTitle>
         <span>Database</span>
         <Box sx={{ display: 'flex', gap: 5 }}>
-          <Button variant="contained" onClick={handleClear}>
-            Clear Filter
-          </Button>
+          {
+            Object.keys(queryFilter).some((key) => !!queryFilter[key]) &&
+              <Button variant="contained" onClick={handleClear}>
+                  Clear Filter
+              </Button>
+          }
           <ButtonFilter
             onClick={() => setOpenPopup(true)}
             style={{ margin: '0 26px 0 0' }}
@@ -512,12 +529,7 @@ const Database = () => {
       {openPopup && (
         <PopupSearch
           onClose={() => setOpenPopup(false)}
-          defaultValue={{
-            session_label: searchParams.get('session_label') || '',
-            datatypes_label: searchParams.get('datatypes_label') || '',
-            type: searchParams.get('type') || '',
-            protocol: searchParams.get('protocol') || '',
-          }}
+          defaultValue={queryFilter}
           onFilter={onFilter}
         />
       )}
@@ -529,7 +541,7 @@ const Database = () => {
         orderKey={columnSort}
         orderBy={orderBy}
         data={databases && databases.records}
-        columns={columns(rowClick, setOpenDelete, type, user)}
+        columns={columns(rowClick, onDeleteImage, type, user)}
       />
       {viewer.url && viewer.open && (
         <ImageView

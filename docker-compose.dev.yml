@@ -1,21 +1,13 @@
 version: "3"
 
 services:
-  studio-be:
+  studio-dev-be:
     build:
       context: .
       dockerfile: Dockerfile.dev
     working_dir: /app
     volumes:
-      - snakemake:/app/
-      - ./optinist:/app/optinist
-      - ./frontend/build:/app/frontend/build
-      - ./backend:/app/backend
-      - ./sample_data:/app/sample_data
-      - ./firebase_config.json:/app/firebase_config.json
-      - ./firebase_private.json:/app/firebase_private.json
-      - ./main.py:/app/main.py
-      - ./.env:/app/.env
+      - .:/app
     ports:
       - "8000:8000"
     command: python main.py --reload --host 0.0.0.0 --port 8000
@@ -23,21 +15,16 @@ services:
       PYTHONPATH: /app/
       TZ: Asia/Tokyo
 
-  studio-fe:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+  studio-dev-fe:
+    image: node:14.19.3-alpine
     working_dir: /app/frontend
     volumes:
       - ./frontend/:/app/frontend/
     ports:
       - "3000:3000"
-    command: yarn start
+    command: ash -c 'yarn install && yarn start'
     environment:
       - CHOKIDAR_USEPOLLING=true
       - BROWSER=none
     env_file:
       - ./frontend/.env.development
-
-volumes:
-  snakemake:

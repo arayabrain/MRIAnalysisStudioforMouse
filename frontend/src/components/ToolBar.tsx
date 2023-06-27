@@ -21,12 +21,14 @@ export const ToolBar = React.memo<UseRunPipelineReturnType>((props) => {
         right: 10,
         zIndex: 4,
         textTransform: 'none',
+        fontSize: '1rem',
       }}
     >
       <Button onClick={() => navigate('/projects')}>
         <ArrowBackIosIcon />
         Projects
       </Button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <SnakemakeButton />
       {/*<NWBSettingButton />*/}
       <RunButtons {...props} />

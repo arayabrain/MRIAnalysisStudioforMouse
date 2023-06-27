@@ -116,6 +116,7 @@ class WorkflowResult:
                     unique_id=node_id,
                     name=function_data[node_id].name,
                     success=', '.join(subjects_data[subject_name].success), # 2D -> 1D
+                    message=function_data[node_id].message,
                     outputs=[os.path.join(GET_NIFTI_IMAGE_API, x) for row in subjects_data[subject_name].output_path for x in row] # 2D -> 1D
                 )
 

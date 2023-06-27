@@ -22,3 +22,5 @@ requests-toolbelt==0.10.1
 python-jose[cryptography]
 nibabel==5.1.0
 matplotlib==3.7.1
+pytest
+pytest-env

@@ -20,3 +20,8 @@ export const editAttributes = async (id: number, data: string) => {
   const response = await axios.put(`${DATABASE_URL_HOST}/rawdb/${id}`, data)
   return response.data
 }
+
+export const deleteRawDb = async (id: number | string) => {
+  const response = await axios.delete(`${DATABASE_URL_HOST}/rawdb/${id}`)
+  return response.data
+}

@@ -333,7 +333,7 @@ const ImageView: FC<ImageViewProps> = ({
                       onChange={onChangeBrightness}
                     />
                   </BoxContentData>
-                  <WrapperButton sx={{ justifyContent: 'flex-end' }}>
+                  <WrapperButton sx={{ justifyContent: 'flex-end', marginTop: 0 }}>
                     <ButtonCanCel onClick={onClose}>Close</ButtonCanCel>
                   </WrapperButton>
                 </Box>
@@ -346,6 +346,7 @@ const ImageView: FC<ImageViewProps> = ({
                     ref={refTextArea}
                     onChange={(event) => onChangeJson(event)}
                     value={textAttribute}
+                    rows={30}
                     readOnly={
                       window.location.pathname === '/projects/new-project'
                     }
@@ -465,7 +466,7 @@ const WrapArea = styled(Box)({
 const TextArea = styled('textarea')({
   width: '98%',
   outline: 'none !important',
-  border: 'none',
+  border: '1px gray solid',
 })
 
 const CloseIconWrapper = styled(CloseIcon)({

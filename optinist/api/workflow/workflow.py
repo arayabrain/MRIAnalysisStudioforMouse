@@ -113,6 +113,7 @@ class NodeInfo:
     unique_id: str
     name: str
     success: str
+    message: str
     outputs: List[str]
 
 

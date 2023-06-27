@@ -20,7 +20,8 @@ class UserCreate(BaseModel):
     role: int
     email: EmailStr
     password: str = Field(
-        max_length=255, regex='^(?=.*\d)(?=.*[!#$%&()*+,-./@_|])(?=.*[a-zA-Z]).{6,255}$'
+        max_length=255,
+        regex=r'^(?=.*\d)(?=.*[!#$%&()*+,-./@_|])(?=.*[a-zA-Z]).{6,255}$',
     )
 
     class Config:
@@ -61,7 +62,8 @@ class UserUpdateName(BaseModel):
 class UserChangePassword(BaseModel):
     old_password: str
     new_password: str = Field(
-        max_length=255, regex='^(?=.*\d)(?=.*[!#$%&()*+,-./@_|])(?=.*[a-zA-Z]).{6,255}$'
+        max_length=255,
+        regex=r'^(?=.*\d)(?=.*[!#$%&()*+,-./@_|])(?=.*[a-zA-Z]).{6,255}$',
     )
 
 

@@ -7,6 +7,7 @@ import Loading from "../common/Loading";
 
 export type FunctionType = {
   name: string
+  message?: string
   outputs: string[]
   success: EXPERIMENTS_STATUS
   unique_id: string
@@ -50,8 +51,6 @@ const Experiment = React.memo(() => {
     fetchData()
     //eslint-disable-next-line
   }, [])
-
-  console.log('data', data)
 
   return (
     <div style={{ display: 'flex', height: 'calc(100% - 58px)' }}>

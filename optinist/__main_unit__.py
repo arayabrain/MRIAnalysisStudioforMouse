@@ -10,13 +10,13 @@ from optinist.api.dir_path import DIRPATH as OPTINIST_DIRPATH
 from optinist.api.config.config_reader import ConfigReader
 from optinist.api.utils.filepath_creater import join_filepath
 
-from backend.routers import auth, stat_image, user_manage
+from backend.routers import auth, user_manage, user_config
 from optinist.routers import algolist, experiment, files, hdf5, outputs, params, run
 
 app = FastAPI(docs_url="/docs", openapi_url="/openapi")
 app.include_router(auth.router, prefix='/auth', tags=['auth'])
 app.include_router(user_manage.router, prefix='/admin/user', tags=['admin'])
-app.include_router(stat_image.router, prefix='/image_stat/param', tags=['image_stat'])
+app.include_router(user_config.router, prefix='/user/config', tags=['user_config'])
 app.include_router(algolist.router)
 app.include_router(files.router)
 app.include_router(outputs.router)

@@ -644,7 +644,7 @@ const TableWrap = styled(Box, {
   shouldForwardProp: (props) => props !== 'addProject',
 })<{ addProject: boolean }>(({ addProject }) => ({
   overflowX: 'scroll',
-  height: `calc(100vh - ${addProject ? 365 : 200}px)`,
+  height: `calc(100vh - ${addProject ? 365 : 205}px)`,
 }))
 
 const DataTable = styled('table')({

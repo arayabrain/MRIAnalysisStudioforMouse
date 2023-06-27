@@ -30,3 +30,5 @@ tensorflow-2.4.1-py3-none-any.whl
 .env
 firebase_config.json
 firebase_private.json
+
+optinist/test_data/output
