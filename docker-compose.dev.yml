@@ -15,16 +15,22 @@ services:
       PYTHONPATH: /app/
       TZ: Asia/Tokyo
 
-  studio-dev-fe:
-    image: node:14.19.3-alpine
+  studio-fe:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     working_dir: /app/frontend
     volumes:
       - ./frontend/:/app/frontend/
+      - ./frontend/node_modules:/app/frontend/node_modules
     ports:
       - "3000:3000"
-    command: ash -c 'yarn install && yarn start'
+    command: ash -c 'yarn start'
     environment:
       - CHOKIDAR_USEPOLLING=true
       - BROWSER=none
     env_file:
       - ./frontend/.env.development
+
+volumes:
+  snakemake:
