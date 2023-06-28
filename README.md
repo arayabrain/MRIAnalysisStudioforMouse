@@ -64,7 +64,7 @@ This application uses firebase.
   - Run the file to set up and start the app:
 
     ```
-    docker composer up
+    docker compose up
     ```
 
 Open browser. http://localhost:8000
