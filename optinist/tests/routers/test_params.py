@@ -7,17 +7,17 @@ client = TestClient(router)
 
 
 def test_params():
-    response = client.get("/params/caiman_mc")
+    response = client.get("/params/suite2p_file_convert")
     data = response.json()
 
     assert response.status_code == 200
     assert isinstance(data, dict)
 
-    assert isinstance(data["border_nan"], str)
-    assert data["border_nan"] == "copy"
+    assert isinstance(data["nplanes"], int)
+    assert data["nplanes"] == 1
 
-    assert isinstance(data["use_cuda"], bool)
-    assert data["use_cuda"] == False
+    assert isinstance(data["force_sktiff"], bool)
+    assert data["force_sktiff"] == False
 
 
 def test_snakemake_params():

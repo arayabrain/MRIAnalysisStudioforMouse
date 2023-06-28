@@ -27,6 +27,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone' // dependent on utc plugin
 import { setLoadingExpriment } from '../Experiments/ExperimentsSlice'
 import { getUrlFromSubfolder } from '../Dataset/DatasetSelector'
+import {resetAllParamsAlignment} from "../InputNode/InputNodeSlice";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -50,12 +51,18 @@ export function useRunPipeline() {
 
   const handleRunPipeline = React.useCallback(
     (name: string) => {
-      dispatch(run({ runPostData: { name, ...runPostData, forceRunList: [] } }))
+      appDispatch(run({ runPostData: { name, ...runPostData, forceRunList: [] } })).then(() => {
+        dispatch(resetAllParamsAlignment())
+      })
     },
+      //eslint-disable-next-line
     [dispatch, runPostData],
   )
   const handleRunPipelineByUid = React.useCallback(() => {
-    dispatch(runByCurrentUid({ runPostData }))
+    appDispatch(runByCurrentUid({ runPostData })).then(() => {
+      dispatch(resetAllParamsAlignment())
+    })
+    //eslint-disable-next-line
   }, [dispatch, runPostData])
   const location = useLocation()
 

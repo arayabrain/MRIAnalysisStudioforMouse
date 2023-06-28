@@ -133,6 +133,16 @@ export const inputNodeSlice = createSlice({
         }
       }
     },
+    resetAllParamsAlignment(state) {
+      Object.keys(state).forEach(key => {
+        const node = state[key]
+        if(node.fileType === FILE_TYPE_SET.IMAGE) {
+          if(node.param?.alignments?.value) {
+            node.param.alignments.value = node.param?.alignments.value.map(value => ({...defaultValueParams, image_id: value.image_id }))
+          }
+        }
+      })
+    }
   },
   extraReducers: (builder) =>
     builder
@@ -310,6 +320,7 @@ export const {
   setInputNodeHDF5Path,
   setInputNodeParamAlignment,
   setSelectedFilePath,
+  resetAllParamsAlignment
 } = inputNodeSlice.actions
 
 export default inputNodeSlice.reducer

@@ -430,7 +430,7 @@ const ImageAlignment: FC<ImageViewProps> = ({
                   sx={{
                     flexDirection: 'column',
                     position: 'relative',
-                    gap: 8,
+                    gap: 4,
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}
@@ -452,6 +452,10 @@ const ImageAlignment: FC<ImageViewProps> = ({
                       urls.findIndex((item) => item.id === image?.id) + 1
                     }/${urls.length})`}</span>
                   </SwitchImage>
+
+                  <Text style={{ color:'crimson', fontSize:'0.8em', width:'80%' }}>
+                    * Alignment input field is cleared after <br /> execute workflow RUN.
+                  </Text>
 
                   <Flex sx={{ gap: 5 }}>
                     <ButtonCanCel onClick={onClose}>CANCEL</ButtonCanCel>

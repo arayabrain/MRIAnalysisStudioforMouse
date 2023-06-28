@@ -11,12 +11,15 @@ def test_register(monkeypatch):
         return {
             "id": "lhJOxYjLVITaB2O0EeqP8mzltjb2",
             "email": "test@reactplus.jp",
-            "display_name": None
+            "display_name": None,
         }
 
     monkeypatch.setattr(client, "post", mock)
-    response = client.post("/register", json={'email':'test@reactplus.jp', 'password':'test@reactplus.jp'})
-    assert response.json()['id'] == 'lhJOxYjLVITaB2O0EeqP8mzltjb2'
+    response = client.post(
+        "/auth/register",
+        json={'email': 'test@reactplus.jp', 'password': 'test123@reactplus.jp'},
+    )
+    assert response['id'] == 'lhJOxYjLVITaB2O0EeqP8mzltjb2'
 
 
 def test_login(monkeypatch):
@@ -24,9 +27,12 @@ def test_login(monkeypatch):
         return {
             "access_token": "test_access_token",
             "refresh_token": None,
-            "token_type": "bearer"
+            "token_type": "bearer",
         }
 
     monkeypatch.setattr(client, "post", mock)
-    response = client.post("/login", json={'email':'test@reactplus.jp', 'password':'test@reactplus.jp'})
-    assert response.json()['access_token'] == 'test_access_token'
+    response = client.post(
+        "/auth/login",
+        json={'email': 'test@reactplus.jp', 'password': 'test123@reactplus.jp'},
+    )
+    assert response['access_token'] == 'test_access_token'

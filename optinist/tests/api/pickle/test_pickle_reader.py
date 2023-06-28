@@ -1,8 +1,7 @@
-import pytest
-
+from optinist.api.dir_path import DIRPATH
 from optinist.api.pickle.pickle_reader import PickleReader
 
-filepath = "/tmp/optinist/output/0123/func1/func1.pkl"
+filepath = f"{DIRPATH.OPTINIST_DIR}/output_test/test_project/0123/func1/func1.pkl"
 
 
 def test_PickleReader():

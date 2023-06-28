@@ -1,4 +1,4 @@
-# studio <img src="docs/_static/studio.png" width="250" title="studio" alt="studio" align="right" vspace = "50">
+# studio
 
 <p align="center">
     <a>
@@ -7,23 +7,14 @@
     <a>
       <img src="https://img.shields.io/badge/-TypeScript-007ACC.svg?logo=typescript&style=flat&logoColor=white">
     </a>
-    <a href="https://pypi.org/project/studio">
-        <img alt="PYPI" src="https://static.pepy.tech/personalized-badge/studio?period=total&units=international_system&left_color=black&right_color=blue&left_text=Downloads(PYPI)">
+    <a href="https://github.com/arayabrain/MRIAnalysisStudioforMouse">
+      <img alt="" src="https://img.shields.io/github/repo-size/arayabrain/MRIAnalysisStudioforMouse">
     </a>
-    <a href="https://pypi.org/project/studio">
-        <img alt="PYPI" src="https://static.pepy.tech/personalized-badge/studio?period=week&units=international_system&left_color=black&right_color=blue&left_text=Downloads/week(PYPI)">
+    <a href="https://github.com/arayabrain/MRIAnalysisStudioforMouse">
+      <img alt="" src="https://img.shields.io/github/stars/arayabrain/MRIAnalysisStudioforMouse?style=social">
     </a>
-    <a href="https://pypi.org/project/studio">
-      <img alt="" src="https://badge.fury.io/py/studio.svg">
-    </a>
-    <a href="https://github.com/oist/studio">
-      <img alt="" src="https://img.shields.io/github/repo-size/oist/studio">
-    </a>
-    <a href="https://github.com/oist/studio">
-      <img alt="" src="https://img.shields.io/github/stars/oist/studio?style=social">
-    </a>
-    <a href="https://github.com/oist/studio">
-      <img alt="" src="https://img.shields.io/github/forks/oist/studio?style=social">
+    <a href="https://github.com/arayabrain/MRIAnalysisStudioforMouse">
+      <img alt="" src="https://img.shields.io/github/forks/arayabrain/MRIAnalysisStudioforMouse?style=social">
     </a>
 </p>
 
@@ -32,21 +23,6 @@ studio(Optical Neuroimage Studio) is a GUI based workflow pipeline tools for pro
 studio helps researchers try multiple data analysis methods, visualize the results, and construct the data analysis pipelines easily and quickly on GUI. studio's data-saving format follows NWB standards.
 
 studio also supports reproducibility of scientific research, standardization of analysis protocols, and developments of novel analysis tools as plug-in.
-
-## Support library
-### ROI detection
-- [x] [Suite2p](https://github.com/MouseLand/suite2p)
-- [x] [CaImAn](https://github.com/flatironinstitute/CaImAn)
-
-### Postprocessing
-- [x] Basic Neural Analysis(Event Trigger Average...)
-- [x] Dimenstion Reduction(PCA...)
-- [x] Neural Decoding(LDA...)
-- [x] Neural Population Analysis(Correlation...)
-
-### Saving Format
-- [x] [NWB](https://github.com/NeurodataWithoutBorders/pynwb)
-
 
 ## Key Features
 ### :beginner: Easy-To-Create Workflow
@@ -60,78 +36,61 @@ studio also supports reproducibility of scientific research, standardization of 
 
 
 ## Installation
+
+### Prepare configuration files
+
+#### Prepare .env
+
 - Copy `.env.example` to `.env` and replace `SECRET_KEY` in `.env` with your SECRET_KEY.
   - To create random SECRET_KEY:
     ```
     openssl rand -hex 32
     ```
+
+#### Prepare firebase configs
+
+This application uses firebase.
+
 - Copy `firebase_config.example.json` to `firebase_config.json` and replace content of `firebase_config.json` with your Firebase config.
 - Copy `firebase_private.example.json` to `firebase_private.json` and replace content of `firebase_private.json` with your Firebase private key.
 
-**Docker required**
-- On Linux or macOS:
-  - Grant execute permission to the run_app.sh file (only run for the first time):
-    ```
-    chmod +x run_app.sh
-    ```
+#### Prepare firebase configs
 
+### Running Application
+
+**Docker required:** Please install docker in advance.
+
+- On Linux(Ubuntu) or macOS or Windows:
   - Run the file to set up and start the app:
 
     ```
-    ./run_app.sh
+    docker compose up
     ```
-- On Windows:
-  - Open Command Prompt or PowerShell and navigate to the folder containing the run_app.sh file. Run the file to set up and start the app:
-    ```
-    bash run_app.sh
-    ```
-    _Note that to use this command, you need to install Git Bash environment on Windows or use Windows Subsystem for Linux (WSL)._
-
 
 Open browser. http://localhost:8000
 
-## Documentation
-https://studio.readthedocs.io/en/latest/
-
-
 ## Using GUI
 ### Workflow
-- studio allows you to make your analysis pipelines by graph style using nodes and edges on GUI. Parameters for each analysis are easily changeable. 
-<p align="center">
-  <img width="400px" src="docs/_static/workflow/whole.png" alt="workflow" />
-</p>
-
+- studio allows you to make your analysis pipelines by graph style using nodes and edges on GUI. Parameters for each analysis are easily changeable.
 
 
 ### Visualize
 - studio allows you to visualize the analysis results with one click by plotly. It supports a variety of plotting styles.
-<p align="center">
-  <img width="400px" src="docs/_static/visualize/whole.png" alt="visualize" />
-</p>
 
 ### Record
 - studio supports you in recording and reproducing workflow pipelines in an organized manner. 
-<p align="center">
-  <img width="400px" src="docs/_static/record/whole.png" alt="record" />
-</p>
 
 
 
 ## Contributors
 ### Proposers
-Kenji Doya, Yukako Yamane [OIST Neural Computation Unit](https://groups.oist.jp/ncu)
+[Sho Yagishita](https://sites.google.com/view/yagishita-group)
 
-### Main Developers
-[Shogo Akiyama](https://github.com/ShogoAkiyama), [Yoshifumi Takeshima](https://github.com/Yoshifumi14)
-
-### Support Developers
-[Tatsuya Tanabe](https://github.com/ttya16), [Yosuke Kaneko](https://github.com/toto-maru), [Syuya Saeki](https://github.com/hiiaka)
-
+### Developers
+[Keita Matsumoto](https://github.com/emuemuJP), [Nobuo Kawada](https://github.com/itutu-tienday), [Rei Hashimoto](https://github.com/ReiHashimoto), [Naoki Takada](https://github.com/takada-naoki-github), [Atsuo Matsueda](https://github.com/Matsueda-Atsuo)
 
 ## References
-[[Suite2p]](https://github.com/MouseLand/suite2p) Marius Pachitariu, Carsen Stringer, Mario Dipoppa, Sylvia Schröder, L. Federico Rossi, Henry Dalgleish, Matteo Carandini, Kenneth D. Harris. "Suite2p: beyond 10,000 neurons with standard two-photon microscopy". 2017  
-[[CaImAn]](https://github.com/flatironinstitute/CaImAn) Andrea Giovannucci Is a corresponding author, Johannes Friedrich, Pat Gunn, Jérémie Kalfon, Brandon L Brown, Sue Ann Koay, Jiannis Taxidis, Farzaneh Najafi, Jeffrey L Gauthier, Pengcheng Zhou, Baljit S Khakh, David W Tank, Dmitri B Chklovskii, Eftychios A Pnevmatikakis. "CaImAn: An open source tool for scalable Calcium Imaging data Analysis". 2019  
-[[PyNWB]](https://github.com/NeurodataWithoutBorders/pynwb) Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K. Dichter, Satrajit Ghosh, Lawrence Niu, Ivan Soltesz, Karel Svoboda, Loren Frank, Kristofer E. Bouchard, "The Neurodata Without Borders ecosystem for neurophysiological data science", bioRxiv 2021.03.13.435173, March 15, 2021
+This product is based on [OptiNiSt](https://github.com/oist/optinist), proposed by [OIST Neural Computation Unit](https://groups.oist.jp/ncu)
 
 <!-- ## Citing the Project
 To cite this repository in publications:

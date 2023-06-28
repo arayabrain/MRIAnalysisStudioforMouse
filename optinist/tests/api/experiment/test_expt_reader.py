@@ -1,23 +1,16 @@
-import pytest
-
-from optinist.api.experiment.experiment_reader import ExptConfigReader
+from optinist.api.dir_path import DIRPATH
 from optinist.api.experiment.experiment import ExptConfig, ExptFunction
-from optinist.api.workflow.workflow import (
-    NodeData,
-    NodePosition,
-    Style,
-    Node,
-    Edge
-)
+from optinist.api.experiment.experiment_reader import ExptConfigReader
+from optinist.api.workflow.workflow import Edge, Node, NodeData, NodePosition, Style
 
-expt_filepath = "/tmp/optinist/output/0123/experiment.yaml"
+expt_filepath = f"{DIRPATH.OPTINIST_DIR}/output_test/test_project/0123/experiment.yaml"
 
 
 def test_read():
     exp_config = ExptConfigReader.read(expt_filepath)
 
     assert isinstance(exp_config, ExptConfig)
-    assert isinstance(exp_config.timestamp, str)
+    assert isinstance(exp_config.project_id, str)
     assert isinstance(exp_config.name, str)
     assert isinstance(exp_config.unique_id, str)
 
@@ -35,7 +28,10 @@ def test_read():
 
     assert isinstance(exp_config.edgeDict, dict)
 
-    edgeDictId = "reactflow__edge-input_0input_0--image--ImageData-suite2p_file_convert_pi2bgrsd6msuite2p_file_convert_pi2bgrsd6m--image--ImageData"
+    edgeDictId = (
+        "reactflow__edge-input_0input_0--image--ImageData-suite2p_file_"
+        "convert_pi2bgrsd6msuite2p_file_convert_pi2bgrsd6m--image--ImageData"
+    )
     assert isinstance(exp_config.edgeDict[edgeDictId].id, str)
     assert isinstance(exp_config.edgeDict[edgeDictId].type, str)
     assert isinstance(exp_config.edgeDict[edgeDictId].animated, bool)
@@ -49,6 +45,7 @@ def test_read():
 def test_read_function():
     func_config = {
         "sample1": {
+            "project_id": "New project",
             "unique_id": "a",
             "name": "a",
             "success": "success",
