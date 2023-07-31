@@ -18,9 +18,9 @@
     </a>
 </p>
 
-studio(Optical Neuroimage Studio) is a GUI based workflow pipeline tools for processing two-photon calcium imaging data.
+studio is a GUI based online workflow pipeline tools for processing animal MRI  data.
 
-studio helps researchers try multiple data analysis methods, visualize the results, and construct the data analysis pipelines easily and quickly on GUI. studio's data-saving format follows NWB standards.
+studio helps researchers try multiple data analysis methods, visualize the results, and construct the data analysis pipelines easily and quickly on GUI without setting up local environment.
 
 studio also supports reproducibility of scientific research, standardization of analysis protocols, and developments of novel analysis tools as plug-in.
 
