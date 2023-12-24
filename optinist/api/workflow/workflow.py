@@ -104,7 +104,7 @@ class RunItem(BaseModel):
 @dataclass
 class SubjectAnalysisInfo:
     success: List[str]
-    output_path: List[str]
+    output_path: List[List[str]]
     message: List[str]
 
 
@@ -113,6 +113,7 @@ class NodeInfo:
     unique_id: str
     name: str
     success: str
+    message: str
     outputs: List[str]
 
 

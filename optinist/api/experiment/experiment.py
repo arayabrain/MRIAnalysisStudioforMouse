@@ -14,7 +14,7 @@ class ExptFunction:
     outputPaths: Optional[Dict[str, OutputPath]] = None
     started_at: Optional[str] = None
     finished_at: Optional[str] = None
-    subjects: Optional[Dict[str, SubjectAnalysisInfo]] = None  # CJS-3: Added.
+    subjects: Optional[Dict[str, SubjectAnalysisInfo]] = None
 
 
 @dataclass

@@ -1,7 +1,6 @@
 from typing import Dict, Optional
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
-from fastapi.responses import FileResponse
 
 import shutil
 from glob import glob
@@ -46,7 +45,7 @@ async def get_experiments(project_id: str):
 """,
     tags=['experiments']
 )
-async def import_experiment():
+async def import_default_experiment():
     config = ExptConfigReader.read(join_filepath([
         DIRPATH.ROOT_DIR,
         DIRPATH.DEFAULT_EXPERIMENT_YML,
@@ -74,18 +73,8 @@ async def import_experiment(unique_id: str):
     "/experiments/fetch/{project_id}", response_model=ExptConfig, tags=["experiments"]
 )
 async def fetch_last_experiment(project_id: str):
-    last_expt_config: Optional[ExptConfig] = None
-    config_paths = glob(
-        join_filepath([DIRPATH.OUTPUT_DIR, project_id, "*", DIRPATH.EXPERIMENT_YML])
-    )
-    for path in config_paths:
-        config = ExptConfigReader.read(path)
-        if not last_expt_config:
-            last_expt_config = config
-        elif datetime.strptime(
-            config.started_at, "%Y-%m-%d %H:%M:%S"
-        ) > datetime.strptime(last_expt_config.started_at, "%Y-%m-%d %H:%M:%S"):
-            last_expt_config = config
+    last_expt_config = get_last_experiment(project_id)
+    
     if last_expt_config:
         return last_expt_config
     else:
@@ -113,38 +102,17 @@ async def delete_experiment_list(deleteItem: DeleteItem):
         return False
 
 
-@router.get("/experiments/download/nwb/{unique_id}", tags=['experiments'])
-async def download_nwb_experiment(unique_id: str):
-    nwb_path_list = glob(join_filepath([
-        DIRPATH.OUTPUT_DIR,
-        unique_id,
-        "*.nwb"
-    ]))
-    if len(nwb_path_list) > 0:
-        return FileResponse(nwb_path_list[0])
-    else:
-        return False
-
-
-@router.get("/experiments/download/nwb/{unique_id}/{function_id}", tags=['experiments'])
-async def download_nwb_experiment(unique_id: str, function_id: str):
-    nwb_path_list = glob(join_filepath([
-        DIRPATH.OUTPUT_DIR,
-        unique_id,
-        function_id,
-        "*.nwb"
-    ]))
-    if len(nwb_path_list) > 0:
-        return FileResponse(nwb_path_list[0])
-    else:
-        return False
-
-
-@router.get("/experiments/download/config/{unique_id}", tags=['experiments'])
-async def download_config_experiment(unique_id: str):
-    config_filepath = join_filepath([
-        DIRPATH.OUTPUT_DIR,
-        unique_id,
-        DIRPATH.SNAKEMAKE_CONFIG_YML
-    ])
-    return FileResponse(config_filepath)
+def get_last_experiment(project_id: str) -> Optional[ExptConfig]:
+    last_expt_config: Optional[ExptConfig] = None
+    config_paths = glob(
+        join_filepath([DIRPATH.OUTPUT_DIR, project_id, "*", DIRPATH.EXPERIMENT_YML])
+    )
+    for path in config_paths:
+        config = ExptConfigReader.read(path)
+        if not last_expt_config:
+            last_expt_config = config
+        elif datetime.strptime(
+            config.started_at, "%Y-%m-%d %H:%M:%S"
+        ) > datetime.strptime(last_expt_config.started_at, "%Y-%m-%d %H:%M:%S"):
+            last_expt_config = config
+    return last_expt_config

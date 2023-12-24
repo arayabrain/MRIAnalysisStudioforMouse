@@ -1,43 +1,219 @@
-from datetime import datetime
+import json
 import os
-from optinist.api.dir_path import DIRPATH
+import shutil
+import sys
+import traceback
 
 from optinist.api.dataclass.dataclass import *
-
-""" vbm_template.py
-A workflow algorithm node template to be used in the voxel-based morphometry (VBM) analysis.
-"""
+from optinist.api.dataclass.analysis_info import NodeAnalysisType
+from optinist.api.utils.filepath_creater import join_filepath
+import optinist.wrappers.vbm_wrapper.vbm.utils as utils
+from optinist.wrappers.vbm_wrapper.vbm_exception import VbmException
 
 
 def vbm_template(
-    image: ImageData,
+    analysis_info_in: AnalysisInfo,
     params: dict=None
 ) -> dict(analysis_info_out=AnalysisInfo):
+    """ A node analysis template for the voxel-based morphometry (VBM) analysis, except for an alignment node.
 
-    print(image.params)
+    Parameters
+        ----------
+        analysis_info_in : AnalysisInfo
+            Info about VBM analysis performed in the previous node.
+        params : Dict
+            Parameters defined in the vbm_template.yaml in addition to project ID, analysis ID, and node ID.
+            project_id : Project ID
+            analysis_id: Analysis ID
+            node_id    : Node ID
 
-    print('vbm_template processing...')
-    print('OPTINIST_DIR', DIRPATH.OPTINIST_DIR)
+    Returns
+        ----------
+        analysis_info_out : AnalysisInfo
+            Info about VBM analysis performed in this node.
+    """
 
-    # Set the paths of the workflow input files.
-    wf_input_file_path_list = [
-        'proj_root/mouse1/sub-mouse1_ses-20230501123456_rec-1_run-1_T2W.nii',
-        'proj_root/mouse2/sub-mouse2_ses-20230502123456_rec-1_run-1_T2W.nii', ]
+    import nipype
+    import nipype.interfaces.spm as spm
 
-    # Create an AnalysisInfo object.
-    project_path = r'../../test_data/cjs/test_project'
-    analysis_info = AnalysisInfo(wf_input_file_path_list, project_path)
+    # Make sure of the connection type.
+    assert analysis_info_in.node_analysis_type == NodeAnalysisType.ALIGNMENT, 'This node connection is not allowed.'
 
-    # Set the data.
-    output_file_path_dict = {}
-    analysis_status_dict = {}
-    for wf_input_path in wf_input_file_path_list:
-        input_file_name = os.path.splitext(os.path.basename(wf_input_path))[0]
-        folder_path = os.path.dirname(wf_input_path)
-        output_file_path = os.path.join(folder_path, input_file_name + '_nodeA.nii')
-        analysis_info.set_output_file_paths(wf_input_path, output_file_path)
-        analysis_info.set_analysis_status(wf_input_path, AnalysisStatus.PROCESSED)
-    analysis_info.analysis_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    analysis_info.analysis_end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    function_name = sys._getframe().f_code.co_name
+    print(f'{function_name} started.')
 
-    return {'analysis_info_out': analysis_info}
+    # Set the input derivatives directory.
+    project_path = utils.get_project_path(params['project_id'])
+    input_dir_path = utils.get_derivatives_dir_path(project_path, params['analysis_id'], NodeAnalysisType.ALIGNMENT)
+
+    # Create the output derivatives directory if it does not exist.
+    output_dir_path = utils.create_derivatives_directory(project_path, params['analysis_id'], 'output')
+
+    # Set SPM12 standalone with MATLAB runtime.
+    vbm_config = utils.load_config()
+    matlab_command = utils.create_matlab_command(vbm_config['spm_script'], vbm_config['matlab_runtime'])
+    spm.SPMCommand.set_mlab_paths(matlab_cmd=matlab_command, use_mcr=True)
+    print(f'Nipype version: {nipype.__version__}')
+    print(f'SPM12 version: {spm.SPMCommand().version}')
+
+    # Get the previous node analysis info in order to check if the analysis is skipped.
+    previous_node_analysis_info = utils.get_previous_node_analysis_info(params)
+
+    # Get the paths of the previously generated output directories in order to clean up
+    # unused ones at the end of analysis.
+    unused_output_dir_path_list = utils.get_subdir_path_list(output_dir_path)
+
+    # Perform some node analysis processing.
+    analysis_info_out = process(analysis_info_in, input_dir_path, output_dir_path, params['skip_analyzed'],
+                                params['some_config'], previous_node_analysis_info, unused_output_dir_path_list)
+
+    # Throw an exception if none of the processings were successful.
+    if analysis_info_out.get_analysis_status() == AnalysisStatus.ERROR:
+        raise VbmException(f'All the processings were failed in {function_name} node. See experiment.yaml for details.')
+
+    # Delete output directories that were not included in this analysis.
+    utils.delete_directories(unused_output_dir_path_list)
+
+    # Save some analysis info in dataset_description.json.
+    create_dataset_description_file(function_name, input_dir_path, output_dir_path, params['skip_analyzed'],
+                                    params['some_config'])
+
+    print(f'{function_name} finished.')
+
+    return {'analysis_info_out': analysis_info_out}
+
+
+def process(analysis_info_in: AnalysisInfo, input_dir_path: str, output_dir_path: str, skip_analyzed: bool,
+            some_config: str, previous_node_analysis_info: Dict, unused_output_dir_path_list: List[str]) -> AnalysisInfo:
+    """ Perform some node analysis processing.
+
+    Parameters
+        ----------
+        analysis_info_in : AnalysisInfo
+            Info about VBM analysis performed in the previous node.
+        input_dir_path : str
+        output_dir_path : str
+        skip_analyzed: bool
+            True for checking if the analysis can be skipped for inputs that have been already analyzed before,
+            otherwise reanalyze anyway.
+        some_config: str
+            Sample parameter.
+        previous_node_analysis_info : dict
+            Key: Workflow input file path
+            Value : dict
+                output_file_paths (list[str])): Paths of the output files generated in the node analysis.
+                success (str): Analysis status message ('success' or 'error').
+                message (str): Any additional message.
+        unused_output_dir_path_list : list[str]
+            Paths of the previously generated output directories, but not included in the analysis.
+
+    Returns
+        ----------
+        analysis_info_out : AnalysisInfo
+            Info about VBM analysis performed in this node.
+    """
+
+    # Create an output AnalysisInfo template.
+    analysis_info_out = analysis_info_in.create_new_analysis_info(NodeAnalysisType.UNDEFINED)
+
+    # Process by each workflow input derivatives.
+    for wf_input_path in analysis_info_in.workflow_input_file_path_list:
+        # Workflow input file name without the extension.
+        wf_input_name = utils.get_file_name_without_extension(wf_input_path)
+        try:
+            # Skip analysis.
+            if utils.skip_node_analysis(wf_input_path, skip_analyzed, previous_node_analysis_info):
+                utils.remove_from_unused_list(join_filepath([output_dir_path, wf_input_name]),
+                                              unused_output_dir_path_list)
+                analysis_info_out.set_output_file_paths(wf_input_path,
+                                                        analysis_info_in.get_output_file_paths(wf_input_path))
+                analysis_info_out.set_analysis_status(wf_input_path, AnalysisStatus.SKIPPED)
+                print(f'Template {wf_input_name} skipped.')
+                continue
+            # Check a previous error.
+            elif analysis_info_in.get_analysis_status(wf_input_path) == AnalysisStatus.ERROR or \
+                    analysis_info_in.get_analysis_status(wf_input_path) == AnalysisStatus.PREVIOUS_ERROR:
+                analysis_info_out.set_analysis_status(wf_input_path, AnalysisStatus.PREVIOUS_ERROR)
+                raise VbmException(f'[Error ({wf_input_name})] Error occurred in the previous node analysis.\n'
+                                   f'{analysis_info_in.get_message(wf_input_path)}')
+            else:
+                # Check if the input data exist.
+                result = utils.check_derivatives_existence(input_dir_path, wf_input_name)
+                if not result['exist']:
+                    raise VbmException(f'[Error ({wf_input_name})] Input data not found in '
+                                       f'{os.path.basename(result["missing_dir_path"])}.')
+                # Delete the old output data if they exist.
+                if utils.check_derivatives_existence(output_dir_path, wf_input_name)['exist']:
+                    utils.delete_derivatives_data(output_dir_path, wf_input_name)
+            print(f'Template {wf_input_name} not skipped.')
+            # Perform some node analysis.
+            analysis_info_out.set_analysis_start_time(wf_input_path)
+            output_subdir_path = utils.create_directory([output_dir_path, wf_input_name])
+            output_file_path_list = core(wf_input_name, input_dir_path, output_dir_path, some_config)
+
+            # Remove this output directory from the unmanaged list.
+            utils.remove_from_unused_list(output_subdir_path, unused_output_dir_path_list)
+
+            # Set the analysis info.
+            analysis_info_out.set_output_file_paths(wf_input_path, output_file_path_list)
+            analysis_info_out.set_analysis_status(wf_input_path, AnalysisStatus.PROCESSED)
+        except:
+            error_message = traceback.format_exc()
+            print(f'[Error ({wf_input_name})]\n{error_message}')
+            analysis_info_out.set_message(wf_input_path, error_message)
+        finally:
+            analysis_info_out.set_analysis_end_time(wf_input_path)
+
+    return analysis_info_out
+
+
+def core(wf_input_name: str, input_dir_path: str, output_dir_path: str, some_config: str) -> List[str]:
+    """ Perform some node analysis.
+
+    Parameters
+        ----------
+        wf_input_name : str
+            Workflow input file name without the extension.
+        input_dir_path : str
+        output_dir_path : str
+        some_config: str
+            Sample parameter.
+
+    Returns
+        ----------
+        output_file_path_list : list[str]
+            Paths of the output files generated in the analysis.
+    """
+
+    from nipype import Node, Workflow
+    from nipype.interfaces.io import SelectFiles, DataSink
+    from nipype.interfaces.spm import NewSegment
+
+    # ===== Implement analysis here. =====
+
+    input_file_path_list = utils.get_derivatives_file_paths(input_dir_path, wf_input_name)
+    output_subdir_path = join_filepath([output_dir_path, wf_input_name])
+    for input_file_path in input_file_path_list:
+        output_file_path = join_filepath([output_subdir_path, wf_input_name + f'_{some_config}.nii'])
+        shutil.copyfile(input_file_path, output_file_path)
+
+    # ====================================
+
+    # Return the paths of the output files generated in the analysis.
+    return utils.get_derivatives_file_paths(output_dir_path, wf_input_name)
+
+
+def create_dataset_description_file(function_name: str, input_dir_path: Union[str, List[str]],
+                                    output_dir_path: str, skip_analyzed: bool, some_config: str):
+    """ Save some analysis info in dataset_description.json. """
+
+    # Create a dataset description dict.
+    input_dir_name_list = [os.path.basename(input_dir_path)]
+    dataset_description = utils.get_dataset_description_template('VBM template', function_name, input_dir_name_list)
+    dataset_description['Parameters']['skip_analyzed'] = skip_analyzed
+    dataset_description['Parameters']['some_config'] = some_config
+
+    # Save it in a JSON file.
+    json_file_path = join_filepath([output_dir_path, 'dataset_description.json'])
+    with open(json_file_path, mode='wt', encoding='utf-8') as file:
+        json.dump(dataset_description, file, indent=2, ensure_ascii=False)

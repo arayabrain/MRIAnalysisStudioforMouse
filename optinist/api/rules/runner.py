@@ -5,6 +5,7 @@ import copy
 from dataclasses import asdict
 from datetime import datetime
 
+from optinist.api.config.config_reader import ConfigReader
 from optinist.api.config.config_writer import ConfigWriter
 from optinist.api.dir_path import DIRPATH
 from optinist.api.experiment.experiment_reader import ExptConfigReader
@@ -16,6 +17,7 @@ from optinist.api.utils.filepath_creater import join_filepath
 from optinist.api.nwb.nwb_creater import merge_nwbfile, save_nwb
 from optinist.api.dataclass.dataclass import AnalysisInfo
 from optinist.api.experiment.experiment import ExptFunction
+from optinist.api.workflow.workflow import OutputPath, SubjectAnalysisInfo
 
 
 class Runner:
@@ -35,6 +37,12 @@ class Runner:
 
             cls.set_func_start_timestamp(os.path.dirname(__rule.output))
 
+            # Get the project ID, analysis ID, and node ID from the pickle file path adding them to the params.
+            tokens = __rule.output.split('/')
+            __rule.params['project_id'] = int(tokens[-4])
+            __rule.params['analysis_id'] = tokens[-3]
+            __rule.params['node_id'] = tokens[-2]
+
             # output_info
             output_info = cls.execute_function(
                 __rule.path,
@@ -42,10 +50,10 @@ class Runner:
                 input_info
             )
 
+            # Update experiment.yaml and workflow_info.yaml based on the output AnalysisInfo object.
             if 'analysis_info_out' in output_info.keys():
-                # The function was added just after the node analysis, which updates experiment.yaml
-                # with the node analysis info such as output file paths and status.
-                cls.set_node_analysis_info(os.path.dirname(__rule.output), output_info['analysis_info_out'])
+                cls.update_experiment_file(os.path.dirname(__rule.output), output_info['analysis_info_out'])
+                cls.update_workflow_info_file(os.path.dirname(__rule.output), output_info['analysis_info_out'])
 
             # nwbfileの設定
             output_info['nwbfile'] = cls.save_func_nwb(
@@ -65,76 +73,105 @@ class Runner:
                 path = join_filepath([path, f"whole_{__rule.type}.nwb"])
                 cls.save_all_nwb(path, output_info['nwbfile'])
 
-            print("output: ", __rule.output)
-
             del input_info, output_info
             gc.collect()
 
         except Exception as e:
+            print(e)
             PickleWriter.write(
                 __rule.output,
                 list(traceback.TracebackException.from_exception(e).format())[-2:],
             )
 
     @classmethod
-    def set_node_analysis_info(cls, output_dirpath: str, analysis_info: AnalysisInfo):
-        """
-        Update the experiment.yaml with the node analysis info such as output file paths and status.
-        """
+    def update_experiment_file(cls, node_output_dir_path: str, analysis_info: AnalysisInfo):
+        """ Update the node analysis info in experiment.yaml based on an AnalysisInfo object. """
 
-        # Get the ExptConfig data from the experiment.yaml.
-        workflow_dirpath = os.path.dirname(output_dirpath)
-        node_id = os.path.basename(output_dirpath)
-        expt_file_path = join_filepath([workflow_dirpath, DIRPATH.EXPERIMENT_YML])
+        # Get the ExptConfig data from experiment.yaml.
+        workflow_output_path = os.path.dirname(node_output_dir_path)
+        node_id = os.path.basename(node_output_dir_path)
+        expt_file_path = join_filepath([workflow_output_path, DIRPATH.EXPERIMENT_YML])
         expt_config = ExptConfigReader.read(expt_file_path)
 
-        # Extract the info about the output files and subjects from the AnalysisInfo object of the node output.
+        # Set the info about the output files and subjects from the AnalysisInfo object.
         output_path_dict = {}
         subject_dict = {}
         for wf_input_path in analysis_info.workflow_input_file_path_list:
-            # For "outputPaths".
+            # Set output file paths to OutputPath.
             output_file_paths = analysis_info.get_output_file_paths(wf_input_path)
             for output_file_path in output_file_paths:
                 file_name = os.path.splitext(os.path.basename(output_file_path))[0]
-                output_path_dict[file_name] = {
-                    'path': output_file_path,
-                    'type': 'images',
-                    'max_index': None
-                }
+                output_path_dict[file_name] = OutputPath(
+                    path=output_file_path,
+                    type='images',
+                    max_index=1
+                )
 
-            # For "subjects".
-            # All the data are held in a form of List to support multiple workflow input files for a single subject.
-            subject = analysis_info.get_subject(wf_input_path)
+            # Set subjects info to SubjectAnalysisInfo.
+            # Each subject field takes a list form in case of multiple workflow input files for a single subject.
+            subject = analysis_info.get_property(wf_input_path, 'subject_name')
             if subject in subject_dict.keys():
-                subject_dict[subject]['success'].append(analysis_info.get_unit_analysis_status(wf_input_path))
-                subject_dict[subject]['output_path'].append(output_file_paths)
-                subject_dict[subject]['message'].append(analysis_info.get_message(wf_input_path))
+                subject_dict[subject].success.append(analysis_info.get_analysis_status_message(wf_input_path))
+                subject_dict[subject].output_path.append(output_file_paths)
+                subject_dict[subject].message.append(analysis_info.get_message(wf_input_path))
             else:
-                subject_dict[subject] = {
-                    'success': [analysis_info.get_unit_analysis_status(wf_input_path)],
-                    'output_path': [output_file_paths],
-                    'message': [analysis_info.get_message(wf_input_path)]
-                }
+                subject_dict[subject] = SubjectAnalysisInfo(
+                    success=[analysis_info.get_analysis_status_message(wf_input_path)],
+                    output_path=[output_file_paths],
+                    message=[analysis_info.get_message(wf_input_path)]
+                )
 
-        # Create an ExptFunction object for the node, and update the ExptConfig data.
-        expt_function = expt_config.function
+        # Update the ExptFunction data of a given node in the ExptConfig data.
         expt_config.function[node_id] = ExptFunction(
-            unique_id=expt_function[node_id].unique_id,
-            name=expt_function[node_id].name,
-            success=analysis_info.get_node_analysis_status(),
-            hasNWB=expt_function[node_id].hasNWB,
-            message=analysis_info.get_node_analysis_status(),
+            unique_id=expt_config.function[node_id].unique_id,
+            name=expt_config.function[node_id].name,
+            success=expt_config.success,
+            hasNWB=expt_config.function[node_id].hasNWB,
+            message=analysis_info.get_analysis_status_message(),
             outputPaths=output_path_dict,
-            started_at=analysis_info.analysis_start_time,
-            finished_at=analysis_info.analysis_end_time,
+            started_at=expt_config.started_at,
+            finished_at=expt_config.finished_at,
             subjects=subject_dict
         )
 
-        # Overwrite the experiment.yaml with updated ExptConfig data.
+        # Overwrite experiment.yaml with the new ExptConfig data.
         ConfigWriter.write(
-            dirname=workflow_dirpath,
+            dirname=workflow_output_path,
             filename=DIRPATH.EXPERIMENT_YML,
             config=asdict(expt_config)
+        )
+
+    @classmethod
+    def update_workflow_info_file(cls, node_output_dir_path: str, analysis_info: AnalysisInfo):
+        """ Update the node analysis info in workflow_info.yaml based on an AnalysisInfo object.
+        The info saved in workflow_info.yaml will be referred in the same node analysis next time.
+        """
+
+        WORKFLOW_INFO_FILE_NAME = 'workflow_info.yaml'
+
+        # Get the workflow info from workflow_info.yaml.
+        workflow_output_path = os.path.dirname(node_output_dir_path)
+        node_id = os.path.basename(node_output_dir_path)
+        file_path = join_filepath([workflow_output_path, WORKFLOW_INFO_FILE_NAME])
+        workflow_info = ConfigReader.read(file_path) if os.path.isfile(file_path) else {}
+
+        # Set the new node analysis info extracted from the AnalysisInfo object.
+        if 'node_analysis' not in workflow_info.keys():
+            workflow_info['node_analysis'] = {}
+        node_info = {}
+        for wf_input_path in analysis_info.workflow_input_file_path_list:
+            node_info[wf_input_path] = {
+                'output_file_paths': analysis_info.get_output_file_paths(wf_input_path),
+                'success': analysis_info.get_analysis_status_message(wf_input_path),
+                'message': analysis_info.get_message(wf_input_path)
+            }
+        workflow_info['node_analysis'][node_id] = node_info
+
+        # Save the workflow info in workflow_info.yaml.
+        ConfigWriter.write(
+            dirname=workflow_output_path,
+            filename=WORKFLOW_INFO_FILE_NAME,
+            config=workflow_info
         )
 
     @classmethod

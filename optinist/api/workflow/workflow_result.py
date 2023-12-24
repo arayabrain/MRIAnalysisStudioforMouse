@@ -1,16 +1,18 @@
 import os
 from dataclasses import asdict
-from datetime import datetime
 from glob import glob
 
 from optinist.api.pickle.pickle_reader import PickleReader
 from optinist.api.dataclass.dataclass import *
-from optinist.api.workflow.workflow import Message, OutputPath, OutputType, ExptInfo, SubjectInfo, NodeInfo
+from optinist.api.workflow.workflow import Message, OutputPath, OutputType, ExptInfo, SubjectInfo, NodeInfo, SubjectAnalysisInfo
 from optinist.api.config.config_writer import ConfigWriter
 from optinist.api.experiment.experiment_reader import ExptConfigReader
+from optinist.api.experiment.experiment import ExptConfig
 from optinist.api.utils.filepath_creater import join_filepath
 from optinist.api.dir_path import DIRPATH
 from optinist.routers.fileIO.file_reader import Reader
+import optinist.routers.workdbmanager as db
+import optinist.wrappers.vbm_wrapper.vbm.utils as utils
 
 
 class WorkflowResult:
@@ -42,7 +44,7 @@ class WorkflowResult:
                         status="error",
                         message=error_message,
                     )
-                
+
             glob_pickle_filepath = join_filepath([
                 self.workflow_dirpath,
                 node_id,
@@ -61,6 +63,7 @@ class WorkflowResult:
         return results
 
     def has_nwb(self, node_id=None):
+
         if node_id is None:
             nwb_filepath_list = glob(join_filepath([
                 self.workflow_dirpath,
@@ -88,41 +91,44 @@ class WorkflowResult:
                     config=asdict(config),
                 )
 
-    def get_experiment_info(self):
-        """
-        Get the experiment info about the workflow analysis.
-        """
+    def get_experiment_info(self, expt_config: ExptConfig) -> ExptInfo:
+        """ Extract the experiment info from the ExptConfig data, and store them in ExptInfo. """
 
-        GET_NIFTI_IMAGE_API = '/outputs/nifti_image/'
+        # URL of get_nifti_image() API, which is attached to the head of an output file path.
+        GET_NIFTI_IMAGE_API_URL = '/outputs/nifti_image'
 
-        # TODO: Set the experiment.yaml path.
-        expt_file_path = os.path.join(DIRPATH.OUTPUT_DIR, str(self.project_id), self.unique_id, DIRPATH.EXPERIMENT_YML)
-        # Dummy
-        expt_file_path = os.path.join(DIRPATH.ROOT_DIR, r'../sample_data/cjs/output/1/3a55fa37/experiment2.yaml')
+        # Get the ExptFunction dict (Dict[<node_id>, ExptFunction]) from the ExptConfig data.
+        expt_function_dict = expt_config.function
 
-        # Get the experiment config data (ExptConfig) and the function data ({<node_id>, ExptFunction}).
-        expt_config = ExptConfigReader.read(expt_file_path)
-        function_data = expt_config.function
-
-        results_data = []   # List[SubjectInfo] appended to ExptInfo.results.
-        for node_id in function_data.keys():
-            # Get the subjects data ({<subject_name>, {<success>, <output_path>, <message>}}).
-            subjects_data = function_data[node_id].subjects
-            if subjects_data is None:
+        results_data = []   # A list of SubjectInfo data, which will be pushed to ExptInfo.results.
+        for node_id, subject_info in expt_function_dict.items():
+            # Get the SubjectAnalysisInfo dict (Dict[<subject_name>, SubjectAnalysisInfo]) of the node, and.
+            # add the SubjectAnalysisInfo data if workflow input files were added in the project after the analysis.
+            subject_analysis_info_dict = self._add_new_subject_analysis_info(int(expt_config.project_id),
+                                                                             expt_config.unique_id,
+                                                                             subject_info.subjects)
+            if subject_analysis_info_dict is None:
                 continue
-            for subject_name in subjects_data.keys():
-                # Summarize the analysis info for the node.
+            for subject_name, subject_analysis_info in subject_analysis_info_dict.items():
+                # Summarize the node analysis info of the subject in NodeInfo.
+                output_file_paths = subject_analysis_info.output_path
                 node_analysis_info = NodeInfo(
                     unique_id=node_id,
-                    name=function_data[node_id].name,
-                    success=', '.join(subjects_data[subject_name].success), # 2D -> 1D
-                    outputs=[os.path.join(GET_NIFTI_IMAGE_API, x) for row in subjects_data[subject_name].output_path for x in row] # 2D -> 1D
+                    name=subject_info.name,
+                    # 'success' field must take a single value of the whole node analysis status, 'success' or 'error',
+                    # otherwise causes an error in RESULT.
+                    # Take 'success' if all the individual analyses have been successful in the node analysis,
+                    # otherwise take 'error'.
+                    success='success' if all(i == 'success' for i in subject_analysis_info.success) else 'error',
+                    message=subject_info.message,
+                    # 2D list -> 1D list. Also, append the API URL at the head of the path.
+                    outputs=[GET_NIFTI_IMAGE_API_URL + path for row in output_file_paths for path in row]
                 )
 
-                # Add to the corresponding subject data in results_data.
-                for subject_data in results_data:
-                    if subject_name == subject_data.name:
-                        subject_data.function[node_id] = node_analysis_info
+                # Add the NodeInfo data to the SubjectInfo data of results_data.
+                for subject_info_data in results_data:
+                    if subject_name == subject_info_data.name:
+                        subject_info_data.function[node_id] = node_analysis_info
                         break
                 else:
                     results_data.append(
@@ -132,9 +138,9 @@ class WorkflowResult:
                             function={node_id: node_analysis_info},
                             nodeDict={},
                             edgeDict={}
-                    ))
+                        ))
 
-        return  ExptInfo(
+        return ExptInfo(
             started_at=expt_config.started_at,
             finished_at=expt_config.finished_at,
             unique_id=expt_config.unique_id,
@@ -142,6 +148,32 @@ class WorkflowResult:
             status=expt_config.success,
             results=results_data
         )
+
+    def _add_new_subject_analysis_info(self, project_id: int, analysis_id: str, subject_analysis_info_dict):
+        """ Add the SubjectAnalysisInfo data if workflow input files were added in the project after the analysis. """
+
+        # TODO: Implement in the DB program.
+        return subject_analysis_info_dict
+
+        # Find newly added IDs.
+        db_file_id_list = db.get_file_id_list(project_id)
+        wf_file_id_list = utils.get_wf_input_file_id_list(project_id, analysis_id)
+        new_ids = list(set(db_file_id_list) - set(wf_file_id_list))
+
+        # Add the SubjectAnalysisInfo data (success='waiting', output_path=[]. message='') for the newly added IDs.
+        for id in new_ids:
+            wf_input_file_path = utils.get_image_file_path(project_id, id)
+            subject_name = utils.get_subject_name(wf_input_file_path)
+            if subject_name in subject_analysis_info_dict.keys():
+                subject_analysis_info_dict[subject_name].success.append('waiting')
+                subject_analysis_info_dict[subject_name].output_path.append([])
+                subject_analysis_info_dict[subject_name].message.append('')
+            else:
+                subject_analysis_info_dict[subject_name] = SubjectAnalysisInfo(success=['waiting'],
+                                                                               output_path=[],
+                                                                               message=[''])
+
+        return subject_analysis_info_dict
 
 
 class NodeResult:
