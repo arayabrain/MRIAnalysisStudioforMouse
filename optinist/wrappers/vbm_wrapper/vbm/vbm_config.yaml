@@ -1,0 +1,12 @@
+spm_script: '/app/spm12/run_spm12.sh'
+matlab_runtime: '/usr/local/MATLAB/MATLAB_Runtime/R2022b/'
+segment1:
+   tpm_path: '/app/tpm'
+segment2:
+   tpm_path: '/app/tpm'
+stats_visualization:
+   extent_threshold: 0
+   bg_image_file_path: '/app/background_images/avg305T1.nii'
+   cmap: 'bwr'
+   dim: 1
+   vmax: 8
